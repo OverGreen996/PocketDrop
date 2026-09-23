@@ -2,14 +2,14 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows + Android · 1.0.0**
+**Windows + Android · 1.0.1**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
-- **PocketDrop-1.0.0-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
-- **PocketDrop-1.0.0-Android.apk**：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
+- **PocketDrop-1.0.1-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
+- **PocketDrop-1.0.1-Android.apk**：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
 Windows 建議使用 **Windows 11 22H2 或更新版本、x64**。Android 需要 **Android 8.0 以上**。
@@ -59,4 +59,4 @@ Windows 安裝包輸出於 `src-tauri/target/release/bundle/nsis/`。
 
 Android：設定 `ANDROID_HOME`、`JAVA_HOME`，以 Gradle 執行 `assembleRelease lintRelease testReleaseUnitTest`。正式更新簽章由本機環境提供，不包含在 Git 中；其他開發者應透過 `POCKETDROP_KEYSTORE`、`POCKETDROP_STORE_PASSWORD`、`POCKETDROP_KEY_ALIAS`、`POCKETDROP_KEY_PASSWORD` 指定自己的簽章。自行簽署的 APK 無法直接覆蓋官方 APK。
 
-原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，發佈檢查請看 [RELEASE_1.0.0.md](docs/RELEASE_1.0.0.md)。
+原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，發佈檢查請看 [RELEASE_1.0.1.md](docs/RELEASE_1.0.1.md)。

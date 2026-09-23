@@ -36,6 +36,7 @@ public final class MainActivity extends Activity {
     private final ExecutorService polls=Executors.newSingleThreadExecutor();
     private final ExecutorService probes=Executors.newFixedThreadPool(2);
     private final HashSet<String> probing=new HashSet<>();
+    private final EndpointCandidates candidates=new EndpointCandidates();
     private Call stateRequest;
     private long connectionEpoch;
     private long pairingAttempt;
@@ -54,7 +55,7 @@ public final class MainActivity extends Activity {
     private String pendingText;
     private final ArrayList<Uri> pendingUris=new ArrayList<>();
     private static final int PICK=31, INK=0xffedf5f5, MUTED=0xffabc1c9, ACCENT=0xff86ddcc;
-    private final Runnable pulse=new Runnable(){public void run(){if(!foreground)return;if(client!=null){refresh();connectSocket();if(!online && ++retryTicks%6==0)discover();}ui.postDelayed(this,5000);}};
+    private final Runnable pulse=new Runnable(){public void run(){if(!foreground)return;if(client!=null){refresh();connectSocket();if(!online){retryCandidates();if(++retryTicks%6==0)discover();}}ui.postDelayed(this,5000);}};
 
     @Override public void onCreate(Bundle saved){super.onCreate(saved);vault=new Vault(this);nearby=new Nearby(this);buildUi();
         try{JSONObject p=vault.load();if(p!=null)client=new RoomClient(p);}catch(Exception e){notice("無法讀取已保存的配對，請重新掃描");}
@@ -63,7 +64,7 @@ public final class MainActivity extends Activity {
     @Override protected void onStart(){super.onStart();foreground=true;restartConnection();if(client!=null)consumePending();}
     @Override protected void onStop(){foreground=false;resetConnection();super.onStop();}
     @Override protected void onDestroy(){cancelled=true;if(transfer!=null)transfer.cancel();network.shutdownNow();polls.shutdownNow();probes.shutdownNow();transfers.shutdownNow();super.onDestroy();}
-    private void resetConnection(){connectionEpoch++;ui.removeCallbacks(pulse);nearby.stop();closeSocket();if(stateRequest!=null){stateRequest.cancel();stateRequest=null;}probing.clear();}
+    private void resetConnection(){connectionEpoch++;ui.removeCallbacks(pulse);nearby.stop();closeSocket();if(stateRequest!=null){stateRequest.cancel();stateRequest=null;}probing.clear();candidates.clear();}
     private void restartConnection(){
         resetConnection();retryTicks=0;setOnline(false);
         if(client!=null)try{client=new RoomClient(client.profile);}catch(Exception e){failure(e);}
@@ -91,7 +92,7 @@ public final class MainActivity extends Activity {
         textView.addView(button("載入 Room 最新文字",()->{editing=false;refresh();}));
         filesView=column();devicesView=column();
         progress=label("",12,MUTED);root.addView(progress);cancel=button("取消傳輸",()->{cancelled=true;Call c=transfer;if(c!=null)c.cancel();});cancel.setVisibility(View.GONE);root.addView(cancel);
-        root.addView(label("1.0.0 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
+        root.addView(label("1.0.1 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
     }
     private void showTab(int index){tab=index;content.removeAllViews();if(index==0)content.addView(textView);else if(index==1){renderFiles();content.addView(filesView);}else{renderDevices();content.addView(devicesView);}}
     private void notice(String text){if(!isDestroyed())ui.post(()->notice.setText(text));}
@@ -100,7 +101,16 @@ public final class MainActivity extends Activity {
     private void discover(){
         RoomClient c=client;if(c==null||!foreground)return;long epoch=connectionEpoch;
         nearby.start(c.profile.optString("device_id"),endpoint->{
-            if(!foreground||connectionEpoch!=epoch||client!=c||probes.isShutdown()||(online&&endpoint.equals(c.endpoint))||!probing.add(endpoint))return;
+            if(!foreground||connectionEpoch!=epoch||client!=c)return;
+            try{candidates.observe(endpoint,SystemClock.elapsedRealtime());}catch(IllegalArgumentException ignored){return;}
+            if(!online||!endpoint.equals(c.endpoint))retryCandidates();
+        });
+    }
+    private void retryCandidates(){
+        RoomClient c=client;if(c==null||!foreground||probes.isShutdown())return;long epoch=connectionEpoch;
+        for(String endpoint:candidates.due(SystemClock.elapsedRealtime(),Math.max(0,2-probing.size()),probing)){
+            if(online&&endpoint.equals(c.endpoint))continue;
+            probing.add(endpoint);
             probes.execute(()->{try{
                 RoomClient candidate=c.at(endpoint);candidate.state();
                 ui.post(()->{
@@ -109,9 +119,9 @@ public final class MainActivity extends Activity {
                     resetConnection();client=candidate;setOnline(true);notice("✓ 已找到電腦，沿用原有配對");
                     discover();ui.post(pulse);
                 });
-            }catch(Exception ignored){/* A candidate is never trusted without pinned TLS and Room authorization. */}
+            }catch(Exception ignored){/* Failed candidates remain eligible for the next foreground retry. */}
             finally{ui.post(()->{if(connectionEpoch==epoch)probing.remove(endpoint);});}});
-        });
+        }
     }
     private void connectSocket(){RoomClient c=client;if(c==null || socket!=null || !foreground)return;
         socket=c.http.newWebSocket(c.request("/v1/events").build(),new WebSocketListener(){
@@ -133,7 +143,7 @@ public final class MainActivity extends Activity {
             if(!editing){updating=true;editor.setText(state.optString("text"));updating=false;}
             else if(next!=revision&&revision>=0)notice("Room 有新文字；你的草稿已保留，可按「載入 Room 最新文字」");
             revision=next;if(tab==1)renderFiles();
-        });}catch(Exception e){ui.post(()->{if(connectionEpoch==epoch&&client==c&&foreground){setOnline(false);notice(RoomClient.connectionError(e));}});}
+        });}catch(Exception e){ui.post(()->{if(connectionEpoch==epoch&&client==c&&foreground){boolean wasOnline=online;setOnline(false);notice(RoomClient.connectionError(e));if(wasOnline){closeSocket();discover();}retryCandidates();}});}
         finally{ui.post(()->{if(stateRequest==call)stateRequest=null;});}});
     }
     private void sendText(String value){RoomClient c=client;if(c==null){notice("先到「裝置」掃描電腦的 QR Code");showTab(2);return;}

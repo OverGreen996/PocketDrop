@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
     namespace 'local.pocketdrop.android'
     compileSdk 35
-    defaultConfig { applicationId 'local.pocketdrop.android'; minSdk 26; targetSdk 35; versionCode 4; versionName '1.0.0' }
+    defaultConfig { applicationId 'local.pocketdrop.android'; minSdk 26; targetSdk 35; versionCode 5; versionName '1.0.1' }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     signingConfigs { upgrade { storeFile file(System.getenv('POCKETDROP_KEYSTORE') ?: '../../.tools/android-user/debug.keystore'); storePassword System.getenv('POCKETDROP_STORE_PASSWORD') ?: 'android'; keyAlias System.getenv('POCKETDROP_KEY_ALIAS') ?: 'androiddebugkey'; keyPassword System.getenv('POCKETDROP_KEY_PASSWORD') ?: 'android' } }
     buildTypes { release { minifyEnabled false; debuggable false; signingConfig signingConfigs.upgrade } }

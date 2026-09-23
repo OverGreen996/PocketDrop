@@ -40,13 +40,13 @@ final class Nearby {
         });}
         @android.annotation.TargetApi(34) void watch(NsdServiceInfo service){
             NsdManager.ServiceInfoCallback callback=new NsdManager.ServiceInfoCallback(){
-                public void onServiceInfoCallbackRegistrationFailed(int errorCode){main.post(()->{if(current()){names.remove(service.getServiceName());watches.remove(this);}});}
+                public void onServiceInfoCallbackRegistrationFailed(int errorCode){main.post(()->{if(current()){names.remove(service.getServiceName());watches.remove(this);queue.add(service);resolveNext();}});}
                 public void onServiceUpdated(NsdServiceInfo info){if(current())publish(info);}
                 public void onServiceLost(){}
                 public void onServiceInfoCallbackUnregistered(){}
             };
             watches.add(callback);
-            try{manager.registerServiceInfoCallback(service,main::post,callback);}catch(RuntimeException e){watches.remove(callback);names.remove(service.getServiceName());}
+            try{manager.registerServiceInfoCallback(service,main::post,callback);}catch(RuntimeException e){watches.remove(callback);names.remove(service.getServiceName());queue.add(service);resolveNext();}
         }
         @android.annotation.TargetApi(34) void unwatch(){for(var callback:watches)try{manager.unregisterServiceInfoCallback(callback);}catch(RuntimeException ignored){}watches.clear();}
         @SuppressWarnings("deprecation") void resolveNext(){

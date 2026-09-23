@@ -20,8 +20,20 @@ public class CodePairingInteropTest {
    RoomClient paired=CodePairing.pair(endpoint,code,id,"Android 測試",publicKey);assertEquals(qr.getString("room_id"),paired.profile.getString("room_id"));
    paired.text("Android to PC via code");assertEquals("Android to PC via code",paired.state().getString("text"));
    try{CodePairing.pair(endpoint,code,UUID.randomUUID().toString(),"replay",publicKey);fail("used invite accepted");}catch(RoomClient.ApiException expected){assertEquals(401,expected.status);}
-   JSONObject saved=new JSONObject(paired.profile.toString());process.destroyForcibly();process.waitFor();Files.delete(dir.resolve("invite.json"));process=start(exe,dir);
-   JSONObject next=new JSONObject(invite(dir).getString("qr"));RoomClient reopened=new RoomClient(saved).at(next.getString("endpoint"));assertEquals("Android to PC via code",reopened.state().getString("text"));assertEquals(paired.profile.getString("credential"),reopened.profile.getString("credential"));
+   JSONObject saved=new JSONObject(paired.profile.toString());
+   for(int restart=0;restart<3;restart++){
+    process.destroyForcibly();process.waitFor();
+    try{paired.state();fail("stopped server appeared online");}catch(java.io.IOException expected){}
+    Files.delete(dir.resolve("invite.json"));process=start(exe,dir);
+    JSONObject next=new JSONObject(invite(dir).getString("qr"));
+    assertEquals("restart must retain the phone's saved endpoint",saved.getString("endpoint"),next.getString("endpoint"));
+    // Do not inject the new endpoint. Exercise the very same running phone client,
+    // then reconstruct it from the original persisted profile, without pairing.
+    assertEquals("Android to PC via code",paired.state().getString("text"));
+    RoomClient reopened=new RoomClient(new JSONObject(saved.toString()));
+    assertEquals("Android to PC via code",reopened.state().getString("text"));
+    assertEquals(paired.profile.getString("credential"),reopened.profile.getString("credential"));
+   }
   }finally{process.destroyForcibly();process.waitFor();try(var paths=Files.walk(dir)){for(Path p:paths.sorted(Comparator.reverseOrder()).toList())Files.deleteIfExists(p);}}
  }
 }

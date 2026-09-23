@@ -31,3 +31,7 @@ Room 電腦以交易序號決定文字版本，不靠客戶端時鐘。保存最
 ## Windows 外觀
 
 Tauri 2、透明無框 WebView2、DWM DWMSBT_TRANSIENTWINDOW 真實原生背景材質。以 DWM 圓角及一致的外層 HTML 半徑消除矩形底層；不用 SetWindowRgn 強制大圓角（這會破壞 DWM 圓角）。內層卡片共用原生模糊，疊加輕 tint 和高光。Windows 11 22H2 以上為完整外觀支援目標；舊版 Windows 顯示不支援原因，不偽造桌布。
+
+## 1.0.1 重連補強
+
+Windows 優先沿用 SQLite 中保存的 listen_port，衝突才重新選埠；每次 listener 使用新的 mDNS instance／hostname 避免舊快取，但 Device ID 及 TLS 身分不變。Android 以有界候選排程持續驗證最近發現的位置，離線不依賴單次回呼。詳見 [RELEASE_1.0.1.md](RELEASE_1.0.1.md)。

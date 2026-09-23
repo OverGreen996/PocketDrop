@@ -660,9 +660,31 @@ pub async fn serve(core: Arc<Core>, ip: Ipv4Addr, smoke: bool) -> Result<(), Str
     core.endpoint.lock().unwrap().clear();
     core.invite.lock().unwrap().take();
     let _ = rustls::crypto::ring::default_provider().install_default();
-    let listener = TcpListener::bind((ip, 0)).map_err(|e| e.to_string())?;
+    // A saved port lets an already paired phone reconnect without waiting for
+    // mDNS cache expiry. This does not fix the IP; discovery remains authoritative
+    // when DHCP changes or another process has occupied the previous port.
+    let previous_port = core
+        .db
+        .lock()
+        .map_err(|_| "資料庫忙碌")?
+        .query_row("SELECT v FROM meta WHERE k='listen_port'", [], |r| {
+            r.get::<_, String>(0)
+        })
+        .optional()
+        .map_err(|e| e.to_string())?
+        .and_then(|s| s.parse::<u16>().ok())
+        .filter(|p| *p != 0);
+    let listener = previous_port
+        .and_then(|port| TcpListener::bind((ip, port)).ok())
+        .map(Ok)
+        .unwrap_or_else(|| TcpListener::bind((ip, 0)))
+        .map_err(|e| e.to_string())?;
     listener.set_nonblocking(true).map_err(|e| e.to_string())?;
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
+    core.db.lock().map_err(|_| "資料庫忙碌")?.execute(
+        "INSERT INTO meta(k,v) VALUES('listen_port',?1) ON CONFLICT(k) DO UPDATE SET v=excluded.v",
+        [port.to_string()],
+    ).map_err(|e| e.to_string())?;
     let tls = axum_server::tls_rustls::RustlsConfig::from_pem(
         core.cert_pem.clone(),
         core.key_pem.clone(),
@@ -679,10 +701,13 @@ pub async fn serve(core: Arc<Core>, ip: Ipv4Addr, smoke: bool) -> Result<(), Str
         ("id", core.device_id.as_str()),
         ("cap", "room-code-v1"),
     ];
+    // Use a fresh service and host name for this listener incarnation, so an
+    // Android resolver cannot keep an old SRV/A record for the stable Device ID.
+    let incarnation = uuid::Uuid::new_v4().simple().to_string();
     let service = ServiceInfo::new(
         SERVICE,
-        &format!("PocketDrop-{}", &core.device_id[..8]),
-        &format!("pd-{}.local.", core.device_id),
+        &format!("PocketDrop-{}-{}", &core.device_id[..8], &incarnation[..8]),
+        &format!("pd-{}-{}.local.", core.device_id, &incarnation[..8]),
         ip.to_string().as_str(),
         port,
         &props[..],

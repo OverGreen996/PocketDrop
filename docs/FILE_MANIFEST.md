@@ -71,3 +71,5 @@
 | `artifacts/release-1.0.0/` | 本機安裝包、APK、校驗值；以 GitHub Release 附件發佈，不放進 Git 原始碼 |
 
 排除：工具鏈、建置目錄、私鑰／keystore、DPAPI、SQLite、邀請資料、使用者截圖與本機測試資料。
+
+1.0.1 新增 `EndpointCandidates.java` 與 `EndpointCandidatesTest.java`，分別提供手機離線候選位置重試排程與回歸檢查。發佈說明見 `docs/RELEASE_1.0.1.md`。

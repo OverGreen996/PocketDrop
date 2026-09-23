@@ -777,6 +777,104 @@ pub fn show_downloads(state: tauri::State<'_, Phone>) -> Result<(), String> {
 mod tests {
     use super::*;
     #[tokio::test]
+    async fn restart_with_occupied_port_is_rediscovered_without_new_pairing() {
+        let ip = if_addrs::get_if_addrs()
+            .unwrap()
+            .into_iter()
+            .find_map(|i| match i.ip() {
+                IpAddr::V4(ip) if local_ip(ip) => Some(ip),
+                _ => None,
+            })
+            .unwrap();
+        let root = std::env::temp_dir().join(format!("pd-restart-{}", uuid::Uuid::new_v4()));
+        let host = Core::open(&root.join("host"), root.join("inbox")).unwrap();
+        let pc = Core::open(&root.join("client"), root.join("client-inbox")).unwrap();
+        serve(host.clone(), ip, false).await.unwrap();
+        discover(&pc).unwrap();
+        let old_endpoint = host.endpoint.lock().unwrap().clone();
+        let old_name = host
+            .transport
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .fullname
+            .clone();
+        code_pair(&pc, old_endpoint.clone(), host.new_invite().unwrap().code)
+            .await
+            .unwrap();
+        let saved = pc.joined.lock().unwrap().clone().unwrap();
+        host.set_text("survives restart".into(), &host.device_id)
+            .unwrap();
+        let old_port = reqwest::Url::parse(&old_endpoint).unwrap().port().unwrap();
+        host.transport.lock().unwrap().take();
+        let mut occupied = None;
+        for _ in 0..100 {
+            if let Ok(listener) = TcpListener::bind((ip, old_port)) {
+                occupied = Some(listener);
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        let occupied = occupied.expect("old listener must release its port");
+        let restarted = Core::open(&root.join("host"), root.join("inbox")).unwrap();
+        serve(restarted.clone(), ip, false).await.unwrap();
+        assert_eq!(restarted.device_id, host.device_id);
+        assert_eq!(restarted.fingerprint, host.fingerprint);
+        assert_ne!(restarted.endpoint.lock().unwrap().as_str(), old_endpoint);
+        assert_ne!(
+            restarted
+                .transport
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .fullname,
+            old_name
+        );
+        // Only mDNS supplies candidates. No new QR or bootstrap endpoint is used.
+        let mut restored = false;
+        for _ in 0..60 {
+            let candidates: Vec<_> = pc
+                .nearby
+                .lock()
+                .unwrap()
+                .values()
+                .filter(|(v, _)| v.device_id == saved.device_id && v.endpoint != old_endpoint)
+                .map(|(v, _)| v.endpoint.clone())
+                .collect();
+            for address in candidates {
+                let mut candidate = saved.clone();
+                candidate.endpoint = address;
+                if let Ok(snapshot) = candidate.snapshot().await {
+                    assert_eq!(snapshot.text, "survives restart");
+                    assert!(relocate(&pc, &saved, &candidate));
+                    restored = true;
+                    break;
+                }
+            }
+            if restored {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(200)).await;
+        }
+        assert!(
+            restored,
+            "mDNS must restore a paired connection after port fallback"
+        );
+        assert_eq!(load(&pc.dir).unwrap().unwrap().credential, saved.credential);
+        restarted.transport.lock().unwrap().take();
+        if let Some(d) = pc.browser.lock().unwrap().take() {
+            let _ = d.shutdown();
+        }
+        drop(occupied);
+        drop(restarted);
+        drop(host);
+        drop(pc);
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        let _ = std::fs::remove_dir_all(root);
+    }
+    #[tokio::test]
     async fn two_computers_pair_metadata_download_reconnect_revoke() {
         let ip = if_addrs::get_if_addrs()
             .unwrap()
