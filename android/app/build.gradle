@@ -1,0 +1,26 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'local.pocketdrop.android'
+    compileSdk 35
+    defaultConfig { applicationId 'local.pocketdrop.android'; minSdk 26; targetSdk 35; versionCode 4; versionName '1.0.0' }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    signingConfigs { upgrade { storeFile file(System.getenv('POCKETDROP_KEYSTORE') ?: '../../.tools/android-user/debug.keystore'); storePassword System.getenv('POCKETDROP_STORE_PASSWORD') ?: 'android'; keyAlias System.getenv('POCKETDROP_KEY_ALIAS') ?: 'androiddebugkey'; keyPassword System.getenv('POCKETDROP_KEY_PASSWORD') ?: 'android' } }
+    buildTypes { release { minifyEnabled false; debuggable false; signingConfig signingConfigs.upgrade } }
+}
+dependencies {
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.80'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'androidx.core:core:1.15.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'com.squareup.okhttp3:okhttp-tls:4.12.0'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+// Include the real Windows binary in the integration test cache key when supplied.
+tasks.withType(Test).configureEach {
+    def server = System.getenv('PD_INTEROP_EXE')
+    if (server) inputs.file(server).withPropertyName('pocketDropWindowsServer')
+}
