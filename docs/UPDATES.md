@@ -31,4 +31,18 @@
 
 每次啟動只檢查一次，非背景推送服務。查詢逾時 12 秒，下載逾時 180 秒。使用者同意後才下載，下載中顯示進度，不提供斷點續傳。官方 updater 會將更新包讀入記憶體驗證；目前安裝包很小，這與 Room 大檔案串流不同。
 
-安裝前保存未分享草稿並攔截本機進行中的下載；來源端正在供應其他装置的下載仍可能中斷，因此提示先完成傳輸。資料與應用識別沿用。舊版本没有更新器，必須手動安裝啟用版一次。Android OTA 不在本次實作。
+安裝前保存未分享草稿並攔截本機進行中的下載；來源端正在供應其他装置的下載仍可能中斷，因此提示先完成傳輸。資料與應用識別沿用。舊版本没有更新器，必須手動安裝啟用版一次。Android 更新流程見下節。
+
+## Android 1.0.2 起
+
+Android 使用獨立版本清單 `https://raw.githubusercontent.com/OverGreen996/PocketDrop/main/updates/android.json`，避免 Android 發布改變 Windows latest。只接受 HTTPS 下此專案的 GitHub release APK。更新 metadata 與 SHA-256 透過 HTTPS 取得；APK 的簽章還須與目前安裝的 App 相同，最後由 Android 安裝器驗證並向使用者確認。私鑰沿用 `.tools/android-user/debug.keystore`（或原先 POCKETDROP_KEYSTORE），不能换簽章後聲稱可覆蓋更新。
+
+發布 Android：
+
+1. 遞增 `android/app/build.gradle` 的 versionCode 與 versionName；新增發佈說明。
+2. 執行 `scripts/android-build.ps1`，再執行 `scripts/package-android-release.ps1 -SkipBuild`。腳本驗證 APK 身分與既有簽章，輸出 APK、android.json、SHA256SUMS.txt。更新 android.json 的 notes 為該版本說明。
+3. 建立 `android-v<version>` Release，先上傳並驗證 APK 及校驗資料，再正式發布；`make_latest` 設為 false。
+4. APK 下載確認可用後，再把輸出的 android.json 複製到 `updates/android.json`，提交並 push main。這一步讓既有 Android App 看見新版。不要先更新 manifest 再上傳 APK。
+5. 重新從 raw.githubusercontent.com 取回 manifest，並下載其 URL 核對大小與 SHA-256。
+
+舊版 Android 1.0.1 必須先手動安裝具備更新功能的 APK 一次。系統若不允許安裝來源，由使用者決定是否允許；不得以程式繞過。Android metadata 大小限制 32 KiB、APK 上限 128 MiB，呼叫逾時 3 分鐘；權限拒絕、取消或失敗都保留原版本。

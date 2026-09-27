@@ -1,0 +1,24 @@
+# PocketDrop Android 1.0.2 — App 內更新
+
+- 開啟 App 後檢查新版，也可使用「裝置 → 檢查 App 更新」。
+- 顯示版本與更新說明，選「稍後」不下載；同意後串流下載 APK，顯示百分比並支援取消。
+- 檢查大小、SHA-256、APK 套件名稱、實際版本及與已安裝 App 相同的簽章。只接受比目前更新的版本。
+- 下載完成後按「繼續安裝」，交由 Android 安裝器確認。需要時會說明並開啟「允許此來源安裝」設定；不靜默安裝，也不繞過系統限制。
+- 配對、金鑰與資料沿用。安裝前保存未分享文字草稿，傳輸進行中不啟動更新。
+- 只有程式更新資訊與 APK 下載連到 GitHub；共享文字、檔案與配對仍走 LAN。
+
+## 首次啟用
+
+將 PocketDrop-1.0.2-Android.apk 複製到手機，直接覆蓋安裝原版，不要解除安裝。1.0.1 沒有更新器，需要這次手動安裝才能啟用後續 OTA。Android 安裝時仍需你點選確認，更新後可能要手動開啟 App。
+
+Windows 維持 1.0.5。本 Android release 不設為 GitHub latest，不影響既有 Windows 更新清單。
+
+## 驗證與限制
+
+- assembleRelease、lintRelease、testReleaseUnitTest 通過；Lint 0 errors / 9 warnings。
+- 15 個 JVM 測試通過（新增 6 個更新測試），另有需 Windows 整合環境的 1 個測試略過。
+- apksigner 驗證成功，憑證 SHA-256 與 Android 1.0.1 相同：1b44b5384101836bff52967d99f6711ea77bc532d5f6ec01bc82d7d2e5680438。
+- 套件 local.pocketdrop.android，versionCode 6，versionName 1.0.2，minSdk 26 / targetSdk 35，非 debuggable。
+- 沒有連接實體 Android 手機，本次未實機驗證系統權限頁、安裝確認與覆蓋更新後重連。測試不等於實機安裝驗證。
+- 更新只在 App 開啟時檢查；不提供背景推送、差分更新、斷點續傳。App 被終止時可重新檢查並下載。
+- 沿用原 APK 的本機簽章金鑰以維持覆蓋安裝相容，不是 Google Play 發布流程。

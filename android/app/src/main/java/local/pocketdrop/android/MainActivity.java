@@ -40,7 +40,7 @@ public final class MainActivity extends Activity {
     private Call stateRequest;
     private long connectionEpoch;
     private long pairingAttempt;
-    private Vault vault; private Nearby nearby;
+    private Vault vault; private Nearby nearby; private AppUpdater appUpdater;
     private volatile RoomClient client; private WebSocket socket;
     private boolean foreground,online,editing,updating,transferBusy;
     private volatile boolean cancelled;
@@ -59,11 +59,22 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle saved){super.onCreate(saved);vault=new Vault(this);nearby=new Nearby(this);buildUi();
         try{JSONObject p=vault.load();if(p!=null)client=new RoomClient(p);}catch(Exception e){notice("無法讀取已保存的配對，請重新掃描");}
-        if(saved==null)receive(getIntent());renderDevices();showTab(0);
+        if(saved==null)receive(getIntent());
+        String draft=getSharedPreferences("update-draft",0).getString("text",null);
+        if(draft!=null){editor.setText(draft);editing=true;}
+        appUpdater=new AppUpdater(this,()->{
+            if(transferBusy)throw new IOException("請先完成或取消檔案傳輸");
+            var storage=getSharedPreferences("update-draft",0).edit();
+            if(editing)storage.putString("text",editor.getText().toString());else storage.remove("text");
+            if(!storage.commit())throw new IOException("無法保存文字草稿，請先分享後再更新");
+        });
+        renderDevices();showTab(0);if(saved==null)appUpdater.check();
     }
+    @Override protected void onResume(){super.onResume();if(appUpdater!=null)appUpdater.resume();}
+    @Override public void onWindowFocusChanged(boolean focus){super.onWindowFocusChanged(focus);if(focus&&appUpdater!=null)appUpdater.resume();}
     @Override protected void onStart(){super.onStart();foreground=true;restartConnection();if(client!=null)consumePending();}
     @Override protected void onStop(){foreground=false;resetConnection();super.onStop();}
-    @Override protected void onDestroy(){cancelled=true;if(transfer!=null)transfer.cancel();network.shutdownNow();polls.shutdownNow();probes.shutdownNow();transfers.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){if(appUpdater!=null)appUpdater.close();cancelled=true;if(transfer!=null)transfer.cancel();network.shutdownNow();polls.shutdownNow();probes.shutdownNow();transfers.shutdownNow();super.onDestroy();}
     private void resetConnection(){connectionEpoch++;ui.removeCallbacks(pulse);nearby.stop();closeSocket();if(stateRequest!=null){stateRequest.cancel();stateRequest=null;}probing.clear();candidates.clear();}
     private void restartConnection(){
         resetConnection();retryTicks=0;setOnline(false);
@@ -89,10 +100,10 @@ public final class MainActivity extends Activity {
         editor.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int st,int c,int a){}public void onTextChanged(CharSequence s,int st,int before,int count){if(!updating)editing=true;}public void afterTextChanged(Editable s){}});
         textView.addView(button("分享文字到 Room",()->sendText(editor.getText().toString())));
         LinearLayout row=new LinearLayout(this);row.addView(button("複製",()->{((ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("PocketDrop",editor.getText()));notice("已複製");}),new LinearLayout.LayoutParams(0,-2,1));row.addView(button("清空並同步",()->sendText("")),new LinearLayout.LayoutParams(0,-2,1));textView.addView(row);
-        textView.addView(button("載入 Room 最新文字",()->{editing=false;refresh();}));
+        textView.addView(button("載入 Room 最新文字",()->{editing=false;getSharedPreferences("update-draft",0).edit().remove("text").apply();refresh();}));
         filesView=column();devicesView=column();
         progress=label("",12,MUTED);root.addView(progress);cancel=button("取消傳輸",()->{cancelled=true;Call c=transfer;if(c!=null)c.cancel();});cancel.setVisibility(View.GONE);root.addView(cancel);
-        root.addView(label("1.0.1 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
+        root.addView(label("1.0.2 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
     }
     private void showTab(int index){tab=index;content.removeAllViews();if(index==0)content.addView(textView);else if(index==1){renderFiles();content.addView(filesView);}else{renderDevices();content.addView(devicesView);}}
     private void notice(String text){if(!isDestroyed())ui.post(()->notice.setText(text));}
@@ -147,9 +158,9 @@ public final class MainActivity extends Activity {
         finally{ui.post(()->{if(stateRequest==call)stateRequest=null;});}});
     }
     private void sendText(String value){RoomClient c=client;if(c==null){notice("先到「裝置」掃描電腦的 QR Code");showTab(2);return;}
-        network.execute(()->{try{c.text(value);ui.post(()->{if(client!=c)return;editing=false;updating=true;editor.setText(value);updating=false;notice("✓ 已分享文字");refresh();});}catch(Exception e){failure(e);}});
+        network.execute(()->{try{c.text(value);ui.post(()->{if(client!=c)return;editing=false;getSharedPreferences("update-draft",0).edit().remove("text").apply();updating=true;editor.setText(value);updating=false;notice("✓ 已分享文字");refresh();});}catch(Exception e){failure(e);}});
     }
-    private void renderDevices(){devicesView.removeAllViews();devicesView.addView(label("自己的裝置，在同一個 Room",21,INK));devicesView.addView(label(client==null?"1. 電腦開啟 PocketDrop\n2. 按「邀請裝置」\n3. 用下方按鈕掃描 QR Code":"已保存電腦身分與配對。\n回到相同 Wi-Fi，開啟 App 便會重新尋找電腦。",15,MUTED));devicesView.addView(button(client==null?"掃描電腦 QR Code":"重新掃描 QR Code",()->new IntentIntegrator(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE).setPrompt("掃描 PocketDrop 電腦畫面的 QR Code").setBeepEnabled(false).setOrientationLocked(false).initiateScan()));
+    private void renderDevices(){devicesView.removeAllViews();devicesView.addView(button("檢查 App 更新",()->{if(appUpdater!=null)appUpdater.check();}));devicesView.addView(label("自己的裝置，在同一個 Room",21,INK));devicesView.addView(label(client==null?"1. 電腦開啟 PocketDrop\n2. 按「邀請裝置」\n3. 用下方按鈕掃描 QR Code":"已保存電腦身分與配對。\n回到相同 Wi-Fi，開啟 App 便會重新尋找電腦。",15,MUTED));devicesView.addView(button(client==null?"掃描電腦 QR Code":"重新掃描 QR Code",()->new IntentIntegrator(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE).setPrompt("掃描 PocketDrop 電腦畫面的 QR Code").setBeepEnabled(false).setOrientationLocked(false).initiateScan()));
         devicesView.addView(button("輸入驗證碼加入",this::pairByCode));
         if(client!=null){devicesView.addView(button("重新尋找電腦",()->{restartConnection();}));devicesView.addView(button("忘記此 Room",()->new AlertDialog.Builder(this).setTitle("忘記此 Room？").setMessage("手機將移除配對。若要撤銷存取權，請在電腦移除此裝置。").setNegativeButton("取消",null).setPositiveButton("忘記",(d,w)->{cancelled=true;if(transfer!=null)transfer.cancel();pairingAttempt++;resetConnection();vault.forget();client=null;files=new JSONArray();revision=-1;editing=false;editor.setText("");nearby.stop();closeSocket();setOnline(false);renderDevices();}).show()));}
         devicesView.addView(label("此 Room 由建立它的電腦保存。\n不使用雲端，不需帳號。\n開啟 App 後會自動連線。",13,MUTED));

@@ -2,14 +2,14 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows 1.0.5 · Android 1.0.1**
+**Windows 1.0.5 · Android 1.0.2**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
 - **PocketDrop-1.0.5-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
-- [**PocketDrop-1.0.1-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.1/PocketDrop-1.0.1-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
+- [**PocketDrop-1.0.2-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/android-v1.0.2/PocketDrop-1.0.2-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
 Windows 清晰外觀以 **Windows 10／11、x64** 為目標，不依賴原生玻璃。玻璃需要 Windows 11 22H2 以上；不承諾 Windows 7／8 支援。Android 需要 **Android 8.0 以上**。
@@ -48,7 +48,7 @@ Windows 1.0.5 起，每次啟動會在背景檢查 GitHub 新版。出現提示�
 
 舊版請先手動安裝 1.0.5 一次，以後不用手動下載安裝包或解除安裝。這是完整程式包的原地更新，不是不中斷執行的熱更新或差分更新。更新期間 Room 暫時離線；配對、設定、資料與未分享文字草稿保留。請先完成所有裝置的檔案傳輸。
 
-只有版本檢查與更新包下載會連到 GitHub；共享文字、檔案與配對仍在 LAN。沒有網際網路時可以照常分享，更新失敗可稍後手動重試。Android 本次未加入更新功能，仍使用 1.0.1。
+只有版本檢查與更新包下載會連到 GitHub；共享文字、檔案與配對仍在 LAN。沒有網際網路時可以照常分享，更新失敗可稍後手動重試。Android 1.0.2 起也支援啟動檢查與「裝置 → 檢查 App 更新」。先手動覆蓋安裝本版一次，之後可在 App 內下載 APK，經 Android 系統確認後更新。首次可能需要允許 PocketDrop 安裝 App；不會繞過系統確認。
 
 發布流程與簽章金鑰管理見 [docs/UPDATES.md](docs/UPDATES.md)。
 

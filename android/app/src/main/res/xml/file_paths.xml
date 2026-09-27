@@ -1,1 +1,1 @@
-<paths xmlns:android="http://schemas.android.com/apk/res/android"><external-files-path name="downloads" path="Download/PocketDrop/" /></paths>
+<paths xmlns:android="http://schemas.android.com/apk/res/android"><external-files-path name="downloads" path="Download/PocketDrop/" /><cache-path name="updates" path="updates/" /></paths>
