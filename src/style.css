@@ -30,3 +30,14 @@ body[data-appearance]:not([data-appearance="glass"]) #text{font-size:16px!import
 body[data-appearance]:not([data-appearance="glass"]) :is(.hint,.tag,.brand p,.settings,.control-row label,.control-row button,select,.card-foot button,#devices button,#file-list button,.drop-zone>span:last-child,.has-files .drop-zone strong){font-size:12px!important}
 body[data-appearance]:not([data-appearance="glass"]) footer{font-size:10px}
 body[data-appearance]:not([data-appearance="glass"]) .brand-icon{display:none}
+/* Native resize gestures are limited to the perimeter, never the text surface. */
+.resize-edge{position:fixed;z-index:10;touch-action:none;user-select:none}
+.resize-North,.resize-South{left:14px;right:14px;height:6px;cursor:ns-resize}
+.resize-North{top:0}.resize-South{bottom:0}
+.resize-East,.resize-West{top:14px;bottom:14px;width:6px;cursor:ew-resize}
+.resize-East{right:0}.resize-West{left:0}
+.resize-NorthEast,.resize-NorthWest,.resize-SouthEast,.resize-SouthWest{width:14px;height:14px}
+.resize-NorthEast{right:0;top:0;cursor:nesw-resize}.resize-NorthWest{left:0;top:0;cursor:nwse-resize}
+.resize-SouthEast{right:0;bottom:0;cursor:nwse-resize}.resize-SouthWest{left:0;bottom:0;cursor:nesw-resize}
+#text{height:180px;min-height:180px;resize:none;overflow:auto;user-select:text;cursor:text}
+footer{gap:12px;flex-wrap:wrap}

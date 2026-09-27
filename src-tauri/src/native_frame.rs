@@ -15,7 +15,7 @@ struct Shape {
     updating: Cell<bool>,
 }
 fn clean_style(style: u32) -> u32 {
-    style & !(WS_CAPTION | WS_THICKFRAME)
+    style & !WS_CAPTION
 }
 fn clean_ex_style(style: u32) -> u32 {
     style & !(WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_DLGMODALFRAME | WS_EX_STATICEDGE)
@@ -60,6 +60,10 @@ unsafe extern "system" fn frame_proc(
     _id: usize,
     data: usize,
 ) -> LRESULT {
+    // Keep WS_THICKFRAME for native sizing, while the client owns the full surface.
+    if msg == WM_NCCALCSIZE {
+        return 0;
+    }
     if msg == WM_NCPAINT {
         return 0;
     }
@@ -176,7 +180,8 @@ mod tests {
     fn frame_filter_preserves_controls() {
         let output =
             clean_style(WS_VISIBLE | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX);
-        assert_eq!(output & (WS_CAPTION | WS_THICKFRAME), 0);
+        assert_eq!(output & WS_CAPTION, 0);
+        assert_ne!(output & WS_THICKFRAME, 0);
         assert_ne!(output & WS_SYSMENU, 0);
     }
     #[test]

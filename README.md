@@ -2,13 +2,13 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows 1.0.2 · Android 1.0.1**
+**Windows 1.0.3 · Android 1.0.1**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
-- **PocketDrop-1.0.2-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
+- **PocketDrop-1.0.3-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
 - [**PocketDrop-1.0.1-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.1/PocketDrop-1.0.1-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
@@ -24,6 +24,8 @@ Windows 安裝包尚未使用 Authenticode 簽章；Microsoft WebView2 尚未安
 5. 貼上文字後按 **分享文字**。將檔案直接拖進 Windows Widget；其他裝置按 **下載** 才取得檔案。
 
 Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許信任的私人網路。訪客 Wi-Fi 的裝置隔離可能阻止互相發現。
+
+視窗可拖曳四邊及四角調整大小（最小 400 × 480）。文字區依內容與換行自動增高，最多採計前 1,000 個字元，並以視窗高度 65%／600 px 為上限（最小 180 px）。超過時在文字區捲動；內容不截斷，仍可框選、Ctrl+A 及複製。
 
 ## 這一版的運作方式
 
