@@ -1,4 +1,4 @@
-param([ValidateSet('dev','build','test','check')][string]$Action = 'dev')
+﻿param([ValidateSet('dev','build','test','check')][string]$Action = 'dev')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
@@ -11,7 +11,13 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) { throw 'Rust MSVC i
 switch ($Action) {
  'test' { cargo test --manifest-path src-tauri/Cargo.toml --locked }
  'check' { cargo check --manifest-path src-tauri/Cargo.toml --locked }
- 'build' { npm.cmd run tauri -- build --bundles nsis }
+  'build' {
+   if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
+     $signingPath = Join-Path $root '.release-private/updater.key'
+     if (-not (Test-Path -LiteralPath $signingPath)) { throw 'Updater signing key missing. See docs/UPDATES.md.' }
+     $env:TAURI_SIGNING_PRIVATE_KEY = $signingPath
+   }
+   npm.cmd run tauri -- build --bundles nsis --ci }
  'dev' { npm.cmd run tauri -- dev }
 }
 exit $LASTEXITCODE

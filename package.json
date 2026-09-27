@@ -1,6 +1,6 @@
 {
   "name": "pocketdrop-m0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "test:rust": "powershell -ExecutionPolicy Bypass -File scripts/desktop.ps1 test"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.10.0",
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-updater": "2.12.0",
     "@zxing/browser": "^0.2.1",
     "qrcode": "^1.5.4"
   },

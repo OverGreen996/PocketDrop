@@ -41,3 +41,5 @@ body[data-appearance]:not([data-appearance="glass"]) .brand-icon{display:none}
 .resize-SouthEast{right:0;bottom:0;cursor:nwse-resize}.resize-SouthWest{left:0;bottom:0;cursor:nesw-resize}
 #text{height:180px;min-height:180px;resize:none;overflow:auto;user-select:text;cursor:text}
 footer{gap:12px;flex-wrap:wrap}
+
+#update-notes{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;max-height:35vh;overflow:auto}#update-progress{font-size:12px;line-height:1.6}#update-available{flex-shrink:0;text-align:left}#update-dialog{color:var(--ink)}

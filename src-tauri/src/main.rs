@@ -6,6 +6,8 @@ mod files;
 #[cfg(windows)]
 mod native_frame;
 mod phone;
+#[cfg(test)]
+mod update_tests;
 
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
@@ -171,6 +173,7 @@ fn main() {
         return;
     }
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(phone::Phone(Mutex::new(None)))
         .manage(discovery::Discovery(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![

@@ -1,6 +1,7 @@
 import './style.css';
 import { initializeAppearance } from './appearance';
 import { fitTextArea } from './text-size';
+import { initializeUpdates } from './updates';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -15,7 +16,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
  <section class="card files-card" id="files"><div class="section-head"><h2>Shared Files</h2><span class="tag" id="file-count">0 個檔案</span></div><div class="drop-zone"><span class="drop-icon">↓</span><strong id="drop-title">把檔案放到這裡</strong><span id="drop-subtitle">其他裝置按下載後才會取得檔案</span></div><ul id="file-list" aria-label="Room 檔案"></ul><p class="hint">下載存入「下載／PocketDrop」</p><button id="downloads">開啟下載資料夾</button><p id="transfer-status" class="hint"></p><button id="cancel-download" hidden>取消下載</button></section>
  <section class="card"><div class="section-head"><h2>自己的裝置</h2><button class="primary" id="pair">邀請裝置 ↗</button></div><div class="control-row"><button id="join">加入既有 Room</button><button id="leave" hidden>返回自己的 Room</button></div><ul id="devices"></ul><p class="hint">手機或另一台電腦都可用驗證碼或 QR 加入。<br>兩端使用同一個 Wi-Fi，電腦需保持開啟。</p></section>
  <details class="settings"><summary>連線與外觀設定</summary><div class="control-row"><label for="interface">本機網路</label><select id="interface"></select><button id="connect">啟動</button></div><p class="hint" id="network-status">若 Windows 詢問防火牆，請允許信任的私人網路，讓手機可以連線。</p><div class="control-row"><label for="appearance">外觀</label><select id="appearance"><option value="dark">清晰深色（建議）</option><option value="light">清晰淺色</option><option value="glass">原生玻璃</option></select></div><p class="hint" id="material-status" role="status"></p><button id="backdrop">開啟外部背景測試板 ↗</button></details>
- <footer><span>1.0.4 · 建立 Room 的電腦需開啟</span><span title="拖曳視窗邊緣可調整大小">拖曳邊緣調整大小 ◢</span></footer><div id="toast" role="status" aria-live="polite"></div>
+ <footer><span>1.0.5 · 建立 Room 的電腦需開啟</span><span title="拖曳視窗邊緣可調整大小">拖曳邊緣調整大小 ◢</span></footer><div id="toast" role="status" aria-live="polite"></div>
  <dialog id="pair-dialog"><div class="section-head"><h2>讓裝置加入 Room</h2><button id="close-pair">×</button></div><p>在另一台裝置輸入驗證碼，或掃描 QR Code</p><p id="invite-host" class="hint"></p><strong id="pair-code" class="pair-code"></strong><button id="copy-code">複製驗證碼</button><canvas id="qr"></canvas><p id="qr-expiry"></p><p class="hint">邀請只能使用一次。請勿轉傳 QR Code。</p><button id="refresh-qr">產生新邀請</button></dialog>
 <dialog id="join-dialog"><div class="section-head"><h2>加入 Room</h2><button id="close-join">×</button></div><p>在建立 Room 的電腦按「邀請裝置」</p><label for="nearby">附近的電腦</label><select id="nearby"></select><button id="scan-rooms">重新尋找</button><input id="verification" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="8 位驗證碼" aria-label="驗證碼"><button id="join-code" class="primary">使用驗證碼加入</button><hr><button id="scan-camera">掃描 QR Code</button><label class="qr-file">或選取 QR 圖片<input id="qr-image" type="file" accept="image/*"></label><video id="camera" muted playsinline hidden></video><p class="hint" id="join-status">請使用同一個 Wi-Fi／區域網路。</p></dialog>
 </main>
@@ -55,7 +56,7 @@ function render(state: Snapshot) {
  lastMembers = state.devices.length;
 }
 async function refresh() { if (refreshing) return; refreshing = true; try { joined = (await invoke<string>('room_mode')) === 'joined'; $('#leave').hidden = !joined; $('#pair').hidden = joined; $('#join').hidden = joined; render(await invoke<Snapshot>('phone_snapshot')); if (joined && !online) $('#room-status').textContent = '○ 電腦離線 · 正在重新尋找，配對已保存'; } catch (e) { $('#room-status').textContent = String(e); } finally { refreshing = false; } }
-async function share(content: string) { try { await invoke('phone_text', {content}); dirty = false; await refresh(); toast('✓ 已分享文字'); } catch (e) { toast(String(e)); } }
+async function share(content: string) { try { await invoke('phone_text', {content}); dirty = false; try { localStorage.removeItem('pocketdrop.update-draft'); } catch {} await refresh(); toast('✓ 已分享文字'); } catch (e) { toast(String(e)); } }
 let textSizeFrame = 0;
 function scheduleTextSize() {
  cancelAnimationFrame(textSizeFrame);
@@ -67,7 +68,7 @@ scheduleTextSize();
 $('#text').oninput = () => { scheduleTextSize(); dirty = true; $('#text-state').textContent = '尚未分享的草稿'; };
 $('#share-text').onclick = () => void share($<HTMLTextAreaElement>('#text').value);
 $('#clear-text').onclick = () => void share('');
-$('#latest').onclick = () => { dirty = false; void refresh(); };
+$('#latest').onclick = () => { dirty = false; try { localStorage.removeItem('pocketdrop.update-draft'); } catch {} void refresh(); };
 $('#copy').onclick = () => void navigator.clipboard.writeText($<HTMLTextAreaElement>('#text').value).then(() => toast('✓ 已複製')).catch(() => toast('請選取文字後按 Ctrl+C'));
 const applyAppearance = initializeAppearance();
 async function invite() {
@@ -140,4 +141,15 @@ async function joinAction(command: string, args: Record<string,string>) {
 $('#join-code').onclick = () => void joinAction('join_code',{address:$<HTMLSelectElement>('#nearby').value,code:$<HTMLInputElement>('#verification').value.trim()});
 $('#scan-camera').onclick = async () => { try { stopScanner(); $<HTMLVideoElement>('#camera').hidden = false; scanner = await new BrowserQRCodeReader().decodeFromVideoDevice(undefined,$<HTMLVideoElement>('#camera'),(result,_error,controls) => { if (result) { controls.stop(); void joinAction('join_qr',{qr:result.getText()}); } }); } catch { $('#join-status').textContent = '無法使用攝影機；可選取 QR 圖片或使用驗證碼。'; } };
 $<HTMLInputElement>('#qr-image').onchange = async e => { const file=(e.target as HTMLInputElement).files?.[0]; if(!file)return; if(file.size>10*1024*1024){toast('QR 圖片請小於 10 MB');return;} const url=URL.createObjectURL(file); try { const result=await new BrowserQRCodeReader().decodeFromImageUrl(url); await joinAction('join_qr',{qr:result.getText()}); } catch { $('#join-status').textContent = '圖片中找不到 PocketDrop QR Code'; } finally { URL.revokeObjectURL(url); } };
+try {
+ const draft = localStorage.getItem('pocketdrop.update-draft');
+ if (draft !== null) { $('#text').textContent = draft; $<HTMLTextAreaElement>('#text').value = draft; dirty = true; $('#text-state').textContent = '更新前草稿已恢復'; scheduleTextSize(); }
+} catch {}
+initializeUpdates(() => {
+ if (!$('#cancel-download').hidden) throw new Error('更新前：請先完成或取消正在下載的檔案。');
+ try {
+  if (dirty) localStorage.setItem('pocketdrop.update-draft', $<HTMLTextAreaElement>('#text').value);
+  else { try { localStorage.removeItem('pocketdrop.update-draft'); } catch {} }
+ } catch { throw new Error('更新前：無法保存文字草稿，請先複製或分享文字後再更新。'); }
+});
 void init().catch(e => toast(`初始化失敗：${String(e)}`));

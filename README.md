@@ -2,13 +2,13 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows 1.0.4 · Android 1.0.1**
+**Windows 1.0.5 · Android 1.0.1**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
-- **PocketDrop-1.0.4-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
+- **PocketDrop-1.0.5-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
 - [**PocketDrop-1.0.1-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.1/PocketDrop-1.0.1-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
@@ -41,6 +41,16 @@ Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許
 - 按右上角 **◐ → 外觀**，選擇「清晰深色」「清晰淺色」或「原生玻璃」。預設清晰深色，不透明底色與較大字體確保桌布不影響閱讀，選擇會保存。玻璃不支援時會明確提示並改用清晰深色。
 - 清晰外觀不要求 Windows 11 的玻璃及圓角 API；Windows 10 可能使用直角外框。目前沒有 Windows 10 實機驗證，不能將建置成功視為所有 Windows 版本相容。
 - 未配對裝置不能讀取文字或檔案；驗證碼／QR 邀請 5 分鐘到期、一次使用。驗證碼採 SRP-6a，TLS 憑證與請求装置身分一併驗證；不在 mDNS 廣播配對碼或 Room 秘密。
+
+## 線上更新
+
+Windows 1.0.5 起，每次啟動會在背景檢查 GitHub 新版。出現提示後按「是，更新」，程式下載並驗證簽章，接著關閉並啟動覆蓋更新，完成後重新開啟。也可在「連線與外觀設定」按「檢查更新」。按「稍後」不會下載或安裝。
+
+舊版請先手動安裝 1.0.5 一次，以後不用手動下載安裝包或解除安裝。這是完整程式包的原地更新，不是不中斷執行的熱更新或差分更新。更新期間 Room 暫時離線；配對、設定、資料與未分享文字草稿保留。請先完成所有裝置的檔案傳輸。
+
+只有版本檢查與更新包下載會連到 GitHub；共享文字、檔案與配對仍在 LAN。沒有網際網路時可以照常分享，更新失敗可稍後手動重試。Android 本次未加入更新功能，仍使用 1.0.1。
+
+發布流程與簽章金鑰管理見 [docs/UPDATES.md](docs/UPDATES.md)。
 
 ## 從原有版本更新
 
