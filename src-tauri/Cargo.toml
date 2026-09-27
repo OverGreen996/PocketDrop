@@ -1,6 +1,6 @@
 [package]
 name = "pocketdrop-m0"
-version = "1.0.3"
+version = "1.0.4"
 description = "PocketDrop Windows and Android LAN sharing"
 edition = "2021"
 

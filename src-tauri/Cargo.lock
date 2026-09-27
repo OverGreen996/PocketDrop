@@ -2596,7 +2596,7 @@ dependencies = [
 
 [[package]]
 name = "pocketdrop-m0"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "axum",
  "axum-server",

@@ -2,13 +2,13 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows 1.0.3 · Android 1.0.1**
+**Windows 1.0.4 · Android 1.0.1**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
-- **PocketDrop-1.0.3-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
+- **PocketDrop-1.0.4-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
 - [**PocketDrop-1.0.1-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.1/PocketDrop-1.0.1-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
