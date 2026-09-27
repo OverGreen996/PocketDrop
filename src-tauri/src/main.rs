@@ -72,7 +72,11 @@ async fn sync_window_shape(
     window
         .run_on_main_thread(move || {
             #[cfg(windows)]
-            let result = native_frame::round(&target, Some(viewport_width));
+            let result: Result<(), String> = {
+                // Decorative rounding is optional; glass checks support separately.
+                let _ = native_frame::round(&target, Some(viewport_width));
+                Ok(())
+            };
             #[cfg(not(windows))]
             let result = Ok(());
             let _ = send.send(result);

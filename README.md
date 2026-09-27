@@ -2,17 +2,17 @@
 
 區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
 
-**Windows + Android · 1.0.1**
+**Windows 1.0.2 · Android 1.0.1**
 
 ## 下載與安裝
 
 到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
 
-- **PocketDrop-1.0.1-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
-- **PocketDrop-1.0.1-Android.apk**：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
+- **PocketDrop-1.0.2-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
+- [**PocketDrop-1.0.1-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.1/PocketDrop-1.0.1-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
 - `SHA256SUMS.txt`：下載檔案校驗值。
 
-Windows 建議使用 **Windows 11 22H2 或更新版本、x64**。Android 需要 **Android 8.0 以上**。
+Windows 清晰外觀以 **Windows 10／11、x64** 為目標，不依賴原生玻璃。玻璃需要 Windows 11 22H2 以上；不承諾 Windows 7／8 支援。Android 需要 **Android 8.0 以上**。
 Windows 安裝包尚未使用 Authenticode 簽章；Microsoft WebView2 尚未安裝時，安裝程序需要網路下載其官方執行環境。PocketDrop 的文字、檔案與配對只走 LAN。
 
 ## 開始使用
@@ -36,7 +36,8 @@ Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許
 - 每台來源電腦最多 200 筆檔案；單檔最多 16 GiB，每次拖入最多 100 個。不支援資料夾，請先壓縮成 ZIP。
 - 支援進度、取消、串流、SHA-256、HTTP Range；尚未提供下載中斷後的自動續傳介面。
 - Android 開啟 App 後連線；不提供背景常駐同步服務。
-- 真實背景 Acrylic 使用 Windows compositor。Windows 10 不保證玻璃與圓角效果，失敗會在外觀設定顯示，不用灰底冒充。
+- 按右上角 **◐ → 外觀**，選擇「清晰深色」「清晰淺色」或「原生玻璃」。預設清晰深色，不透明底色與較大字體確保桌布不影響閱讀，選擇會保存。玻璃不支援時會明確提示並改用清晰深色。
+- 清晰外觀不要求 Windows 11 的玻璃及圓角 API；Windows 10 可能使用直角外框。目前沒有 Windows 10 實機驗證，不能將建置成功視為所有 Windows 版本相容。
 - 未配對裝置不能讀取文字或檔案；驗證碼／QR 邀請 5 分鐘到期、一次使用。驗證碼採 SRP-6a，TLS 憑證與請求装置身分一併驗證；不在 mDNS 廣播配對碼或 Room 秘密。
 
 ## 從原有版本更新

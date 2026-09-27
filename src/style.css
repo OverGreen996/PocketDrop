@@ -9,3 +9,24 @@ textarea::placeholder{color:var(--muted);opacity:.8}.brand-icon{flex-shrink:0}.b
 .widget{border-radius:8px}
 
 [hidden]{display:none!important}.pair-code{display:block;text-align:center;font-size:28px;letter-spacing:6px;margin:15px 0}#join-dialog input{display:block;width:100%;padding:12px;margin:12px 0;border-radius:8px;border:1px solid #86c8b8;background:#102731;color:white}#nearby{display:block;width:100%;margin-top:8px}#camera{width:100%;max-height:200px}.qr-file{display:block;margin-top:14px}#join-dialog hr{border:0;border-top:1px solid #fff3;margin:16px 0}
+/* Opaque themes deliberately do not depend on native backdrop support. */
+body[data-appearance="dark"]{--ink:#f4f7fc;--muted:#c6d2e2;--line:#63738a;--surface:#172131;--card:#243247;--field:#101a29;--hover:#354860;--accent:#a6f5dd;--accent-bg:#224e48;color-scheme:dark}
+body[data-appearance="light"]{--ink:#152338;--muted:#435570;--line:#8797ac;--surface:#eef2f8;--card:#ffffff;--field:#f5f7fb;--hover:#dce5f1;--accent:#075b46;--accent-bg:#d5f1e7;color-scheme:light}
+body[data-appearance="dark"],body[data-appearance="light"]{background:var(--surface)}
+body[data-appearance]:not([data-appearance="glass"]) .widget{background:var(--surface);border-color:var(--line);box-shadow:none;transition:none;scrollbar-color:var(--line) var(--surface)}
+body[data-appearance]:not([data-appearance="glass"]) .card{background:var(--card);border-color:var(--line)}
+body[data-appearance]:not([data-appearance="glass"]) :is(select,option,#join-dialog input){background:var(--field);color:var(--ink);border-color:var(--line)}
+body[data-appearance]:not([data-appearance="glass"]) :is(dialog,#toast){background:var(--card);color:var(--ink);border-color:var(--line)}
+body[data-appearance]:not([data-appearance="glass"]) :is(.tag,.brand-icon){background:var(--field);color:var(--muted)}
+body[data-appearance]:not([data-appearance="glass"]) button:hover{background:var(--hover)}
+body[data-appearance]:not([data-appearance="glass"]) :is(.primary,button[aria-pressed="true"]){background:var(--accent-bg);color:var(--accent);border-color:var(--accent)!important}
+body[data-appearance]:not([data-appearance="glass"]) #qr-expiry{color:var(--accent)}
+body[data-appearance]:not([data-appearance="glass"]) :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body[data-appearance]:not([data-appearance="glass"]) :is(#file-list li,#join-dialog hr){border-color:var(--line)}
+body[data-appearance]:not([data-appearance="glass"]) textarea::placeholder{opacity:1}
+body[data-appearance]:not([data-appearance="glass"]).drag-over .files-card{background:var(--accent-bg);border-color:var(--accent)}
+body[data-appearance]:not([data-appearance="glass"]) h2{font-size:14px}
+body[data-appearance]:not([data-appearance="glass"]) #text{font-size:16px!important}
+body[data-appearance]:not([data-appearance="glass"]) :is(.hint,.tag,.brand p,.settings,.control-row label,.control-row button,select,.card-foot button,#devices button,#file-list button,.drop-zone>span:last-child,.has-files .drop-zone strong){font-size:12px!important}
+body[data-appearance]:not([data-appearance="glass"]) footer{font-size:10px}
+body[data-appearance]:not([data-appearance="glass"]) .brand-icon{display:none}

@@ -1,4 +1,4 @@
-param([switch]$SkipBuild)
+﻿param([switch]$SkipBuild, [switch]$WindowsOnly)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
@@ -6,7 +6,7 @@ $version = (Get-Content -Raw package.json | ConvertFrom-Json).version
 if (-not $SkipBuild) {
     npm.cmd run package
     if ($LASTEXITCODE -ne 0) { throw 'Windows packaging failed' }
-    & "$PSScriptRoot/android-build.ps1"
+    if (-not $WindowsOnly) { & "$PSScriptRoot/android-build.ps1" }
 }
 $output = Join-Path $root "artifacts/release-$version"
 New-Item -ItemType Directory -Force -Path $output | Out-Null
@@ -14,6 +14,7 @@ $files = @(
     @{ Source = "src-tauri/target/release/bundle/nsis/PocketDrop_${version}_x64-setup.exe"; Name = "PocketDrop-$version-Windows-x64-Setup.exe" },
     @{ Source = 'android/app/build/outputs/apk/release/app-release.apk'; Name = "PocketDrop-$version-Android.apk" }
 )
+if ($WindowsOnly) { $files = @($files[0]) }
 $lines = foreach ($item in $files) {
     if (-not (Test-Path -LiteralPath $item.Source)) { throw "Missing artifact: $($item.Source)" }
     $destination = Join-Path $output $item.Name

@@ -138,7 +138,9 @@ pub fn round(window: &WebviewWindow, _viewport_width: Option<f64>) -> Result<(),
     }
 }
 pub fn material(window: &WebviewWindow, enabled: bool) -> Result<(), String> {
-    round(window, None)?;
+    if enabled {
+        round(window, None)?;
+    }
     let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as HWND;
     let backdrop = if enabled {
         DWMSBT_TRANSIENTWINDOW
@@ -153,13 +155,19 @@ pub fn material(window: &WebviewWindow, enabled: bool) -> Result<(), String> {
             4,
         )
     };
-    if hr < 0 {
+    if enabled && hr < 0 {
         return Err(
             "此 Windows 不支援此版原生圓角 Acrylic（需要 Windows 11 22H2 以上）；未套用灰底替代"
                 .into(),
         );
     }
-    round(window, None)
+    if enabled {
+        round(window, None)
+    } else {
+        // Solid rendering does not require Windows 11 backdrop or corner APIs.
+        let _ = round(window, None);
+        Ok(())
+    }
 }
 #[cfg(test)]
 mod tests {
