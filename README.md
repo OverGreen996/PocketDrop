@@ -73,3 +73,7 @@ Windows 安裝包輸出於 `src-tauri/target/release/bundle/nsis/`。
 Android：設定 `ANDROID_HOME`、`JAVA_HOME`，以 Gradle 執行 `assembleRelease lintRelease testReleaseUnitTest`。正式更新簽章由本機環境提供，不包含在 Git 中；其他開發者應透過 `POCKETDROP_KEYSTORE`、`POCKETDROP_STORE_PASSWORD`、`POCKETDROP_KEY_ALIAS`、`POCKETDROP_KEY_PASSWORD` 指定自己的簽章。自行簽署的 APK 無法直接覆蓋官方 APK。
 
 原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，發佈檢查請看 [RELEASE_1.0.1.md](docs/RELEASE_1.0.1.md)。
+
+## Daily-Agent 介接 API
+
+Windows PocketDrop 1.0.5 可透過配對後的 HTTPS API 連接 Daily-Agent，提供共享文字讀寫與檔案列表。[安裝與 API 文件](integrations/daily-agent/README.md)。
