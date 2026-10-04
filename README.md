@@ -1,19 +1,62 @@
-# PocketDrop
+<p align="center">
+  <img src="docs/assets/readme-hero.svg" width="1200" alt="PocketDrop：電腦與手機，在同一個區域網路共享文字與檔案。">
+</p>
 
-區域網路裡的共享暫存盒。文字貼進去，檔案丟進去，自己的裝置就能取用。
+<h1 align="center">PocketDrop</h1>
 
-**Windows 1.0.5 · Android 1.0.2**
+<p align="center">
+  <strong>貼進去。丟進去。拿出來。</strong><br>
+  區域網路裡的共享暫存盒，讓電腦與手機共用一個 Room。<br>
+  不需要帳號、不需要雲端儲存，也不用輸入 IP。
+</p>
+
+<p align="center">
+  <a href="https://github.com/OverGreen996/PocketDrop/releases/tag/v1.0.5"><img src="https://img.shields.io/badge/Windows-1.0.5-2563eb?style=flat-square" alt="Windows 1.0.5"></a>
+  <a href="https://github.com/OverGreen996/PocketDrop/releases/tag/android-v1.0.2"><img src="https://img.shields.io/badge/Android-1.0.2-147d64?style=flat-square" alt="Android 1.0.2"></a>
+</p>
+
+<p align="center">
+  <a href="#下載與安裝"><strong>下載安裝</strong></a> ·
+  <a href="#開始使用">開始使用</a> ·
+  <a href="#外觀與操作">外觀與操作</a> ·
+  <a href="#daily-agent-介接-api">Daily-Agent API</a> ·
+  <a href="#開發">開發文件</a>
+</p>
+
+---
+
+## 手機和電腦，接起來就好
+
+在電腦貼上一段文字，手機就能取用；把檔案拖進 Widget，另一台裝置就能看到。需要檔案時再下載，不必先替每台裝置複製一份。
+
+| Shared Text | Shared Files |
+| :--- | :--- |
+| 分享網址、程式碼、筆記或 Prompt | 分享圖片、PDF、ZIP、STL 等一般檔案 |
+| 貼上 → 按「分享文字」→ 其他裝置查看、複製 | 拖入 → 同步檔案資訊 → 需要時下載 |
+| 手機也能從系統分享選單送入文字 | 手機也能選檔或從系統分享選單加入檔案 |
+
+> [!IMPORTANT]
+> **目前版本需要建立 Room 的電腦保持開啟。** 其他電腦和 Android 手機需使用相同 Wi-Fi／LAN；Android 需開啟 App 才會連線。
 
 ## 下載與安裝
 
-到 [Releases](https://github.com/OverGreen996/PocketDrop/releases/latest) 下載：
+| 平台 | 安裝包 | 系統需求 |
+| :--- | :--- | :--- |
+| **Windows** | [**下載 Windows 1.0.5**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.5/PocketDrop-1.0.5-Windows-x64-Setup.exe) | Windows 10／11，x64；需要 WebView2 |
+| **Android** | [**下載 Android 1.0.2 APK**](https://github.com/OverGreen996/PocketDrop/releases/download/android-v1.0.2/PocketDrop-1.0.2-Android.apk) | Android 8.0 以上 |
 
-- **PocketDrop-1.0.5-Windows-x64-Setup.exe**：Windows 安裝包，安裝於目前使用者帳號。
-- [**PocketDrop-1.0.2-Android.apk**](https://github.com/OverGreen996/PocketDrop/releases/download/android-v1.0.2/PocketDrop-1.0.2-Android.apk)：複製到 Android 手機後點擊安裝。已有 PocketDrop 時直接覆蓋更新，請勿先解除安裝。
-- `SHA256SUMS.txt`：下載檔案校驗值。
+[所有版本與 SHA256 校驗檔](https://github.com/OverGreen996/PocketDrop/releases) · [回報問題](https://github.com/OverGreen996/PocketDrop/issues)
 
-Windows 清晰外觀以 **Windows 10／11、x64** 為目標，不依賴原生玻璃。玻璃需要 Windows 11 22H2 以上；不承諾 Windows 7／8 支援。Android 需要 **Android 8.0 以上**。
-Windows 安裝包尚未使用 Authenticode 簽章；Microsoft WebView2 尚未安裝時，安裝程序需要網路下載其官方執行環境。PocketDrop 的文字、檔案與配對只走 LAN。
+Windows 執行安裝包即可；Android 將 APK 複製到手機後點擊安裝。已有舊版時，**直接覆蓋更新，不要先解除安裝**，以保留配對與資料。
+
+<details>
+<summary>安裝前須知與相容性</summary>
+
+Windows 清晰外觀以 Windows 10／11 為目標，不依賴原生玻璃；尚未完成 Windows 10 實機驗證，不承諾 Windows 7／8 相容。原生玻璃需要 Windows 11 22H2 以上。iOS 尚未提供。
+
+Windows 安裝於目前使用者帳號，安裝包尚未使用 Authenticode 簽章。尚未安裝 WebView2 時，安裝程序需要連網下載 Microsoft 官方執行環境。Android 首次安裝可能需要允許安裝來源。
+
+</details>
 
 ## 開始使用
 
@@ -25,9 +68,30 @@ Windows 安裝包尚未使用 Authenticode 簽章；Microsoft WebView2 尚未安
 
 Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許信任的私人網路。訪客 Wi-Fi 的裝置隔離可能阻止互相發現。
 
+## 外觀與操作
+
+按右上角 **◐ → 外觀**，選擇適合你的桌面風格；設定會保存。
+
+| 外觀 | 適用情境 |
+| :--- | :--- |
+| **清晰深色** · 預設 | 深色不透明底，桌布不影響文字閱讀 |
+| **清晰淺色** | 偏好明亮介面，或需要更清楚的文字對比 |
+| **原生玻璃** | Windows 11 22H2 以上，使用 Windows 原生背景材質 |
+
+**拖曳視窗四邊或四角，就能自由調整大小。** 文字區也會隨內容增高；超過上限後捲動，方便框選與複製。
+
+<details>
+<summary>文字區尺寸與 Windows 外觀差異</summary>
+
 視窗可拖曳四邊及四角調整大小（最小 400 × 480）。文字區依內容與換行自動增高，最多採計前 1,000 個字元，並以視窗高度 65%／600 px 為上限（最小 180 px）。超過時在文字區捲動；內容不截斷，仍可框選、Ctrl+A 及複製。
 
-## 這一版的運作方式
+前 1,000 字元是高度計算範圍，不是文字內容的長度限制。清晰外觀不依賴 Windows 11 玻璃及圓角 API；Windows 10 可能顯示直角外框。玻璃不支援時會提示並改用清晰深色。
+
+上方橫幅是品牌示意圖，不是軟體實機截圖。
+
+</details>
+
+## 檔案流向與目前限制
 
 **建立 Room 的電腦必須保持開啟。** 這是目前版本採用的運作方式，尚未提供無中央裝置的 Room。
 
@@ -38,9 +102,7 @@ Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許
 - 每台來源電腦最多 200 筆檔案；單檔最多 16 GiB，每次拖入最多 100 個。不支援資料夾，請先壓縮成 ZIP。
 - 支援進度、取消、串流、SHA-256、HTTP Range；尚未提供下載中斷後的自動續傳介面。
 - Android 開啟 App 後連線；不提供背景常駐同步服務。
-- 按右上角 **◐ → 外觀**，選擇「清晰深色」「清晰淺色」或「原生玻璃」。預設清晰深色，不透明底色與較大字體確保桌布不影響閱讀，選擇會保存。玻璃不支援時會明確提示並改用清晰深色。
-- 清晰外觀不要求 Windows 11 的玻璃及圓角 API；Windows 10 可能使用直角外框。目前沒有 Windows 10 實機驗證，不能將建置成功視為所有 Windows 版本相容。
-- 未配對裝置不能讀取文字或檔案；驗證碼／QR 邀請 5 分鐘到期、一次使用。驗證碼採 SRP-6a，TLS 憑證與請求装置身分一併驗證；不在 mDNS 廣播配對碼或 Room 秘密。
+- 未配對裝置不能讀取文字或檔案；驗證碼／QR 邀請 5 分鐘到期、一次使用。驗證碼採 SRP-6a，TLS 憑證與請求裝置身分一併驗證；不在 mDNS 廣播配對碼或 Room 秘密。
 
 ## 線上更新
 
@@ -56,6 +118,36 @@ Windows 1.0.5 起，每次啟動會在背景檢查 GitHub 新版。出現提示�
 
 Windows 保留原本的應用程式識別及本機資料路徑；Android 保留套件識別與發佈簽章，更新可沿用既有配對。請先關閉舊版 Windows PocketDrop，再啟動安裝後的版本，避免同一個 Room 同時啟動兩份。
 
+## Daily-Agent 介接 API
+
+Windows PocketDrop 1.0.5 可透過配對後的 HTTPS API 連接 Daily-Agent，提供共享文字讀寫與檔案列表。[安裝與 API 文件](integrations/daily-agent/README.md)。
+
+可以對電腦上的 Daily-Agent 說：
+
+> 「讀取 PocketDrop 的共享文字。」<br>
+> 「把這段文字分享到 PocketDrop：明天十點開會。」<br>
+> 「列出 PocketDrop 的檔案。」
+
+需另行安裝介接模組、用 QR 配對，再重新啟動 Daily-Agent。目前僅供電腦使用者明確呼叫，不開放手機遠端橋接或背景事件。若 Daily-Agent 使用雲端模型，主動讀取的內容可能送往該模型。
+
+## 常見問題
+
+<details>
+<summary>已配對，卻顯示離線或找不到電腦？</summary>
+
+先確認 Room 電腦已開啟 PocketDrop、手機已開啟 App，兩端使用相同 LAN。防火牆需允許信任的私人網路；訪客 Wi-Fi 或裝置隔離可能阻止連線。通常不需要重新配對。
+
+仍無法連線時，請到 [Issues](https://github.com/OverGreen996/PocketDrop/issues) 提供系統版本、App 版本與重現步驟，不要附配對 QR 或憑證。
+
+</details>
+
+<details>
+<summary>能從外面連回家裡，或讓 Room 電腦關機嗎？</summary>
+
+目前只支援 LAN，建立 Room 的電腦必須保持開啟。不提供網際網路遠端連線、資料夾同步、自動備份或雲端儲存；Android 尚未提供背景常駐同步，iOS 尚未推出。
+
+</details>
+
 ## 開發
 
 需要 Node.js、Rust MSVC、Visual Studio C++ Build Tools、WebView2；Android 需要 JDK 17、Gradle 8.11.1 與 Android SDK 35。
@@ -65,15 +157,10 @@ npm ci
 npm run desktop
 npm run build
 npm run test:rust
-npm run package
 ```
 
-Windows 安裝包輸出於 `src-tauri/target/release/bundle/nsis/`。
+`npm run package` 需要更新簽章金鑰，請先閱讀 [更新發布流程](docs/UPDATES.md)；儲存庫不包含官方私鑰。Windows 安裝包輸出於 `src-tauri/target/release/bundle/nsis/`。
 
 Android：設定 `ANDROID_HOME`、`JAVA_HOME`，以 Gradle 執行 `assembleRelease lintRelease testReleaseUnitTest`。正式更新簽章由本機環境提供，不包含在 Git 中；其他開發者應透過 `POCKETDROP_KEYSTORE`、`POCKETDROP_STORE_PASSWORD`、`POCKETDROP_KEY_ALIAS`、`POCKETDROP_KEY_PASSWORD` 指定自己的簽章。自行簽署的 APK 無法直接覆蓋官方 APK。
 
-原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，發佈檢查請看 [RELEASE_1.0.1.md](docs/RELEASE_1.0.1.md)。
-
-## Daily-Agent 介接 API
-
-Windows PocketDrop 1.0.5 可透過配對後的 HTTPS API 連接 Daily-Agent，提供共享文字讀寫與檔案列表。[安裝與 API 文件](integrations/daily-agent/README.md)。
+原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，版本更新請看 [Windows 1.0.5](docs/RELEASE_1.0.5.md) 與 [Android 1.0.2](docs/RELEASE_ANDROID_1.0.2.md)。
