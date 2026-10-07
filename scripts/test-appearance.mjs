@@ -16,5 +16,5 @@ a=app('glass',true);await a.context.apply();assert.equal(a.body.dataset.appearan
 a=app('glass');await a.context.apply();assert.equal(a.body.dataset.appearance,'glass');
 a=app('invalid');await a.context.apply();assert.equal(a.body.dataset.appearance,'dark');
 function luminance(hex){return hex.match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0)}
-let minimum=100;for(const [ink,muted,bgs] of [['f4f7fc','c6d2e2',['172131','243247','101a29']],['152338','435570',['eef2f8','ffffff','f5f7fb']]])for(const fg of [ink,muted])for(const bg of bgs){const a=luminance(fg),b=luminance(bg);const ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);minimum=Math.min(minimum,ratio);assert.ok(ratio>=4.5)}
+let minimum=100;for(const [ink,muted,bgs] of [['f1f5fa','b8c6d5',['111c2b','1b2a3b','142131']],['162d3d','4a6070',['eef3f5','ffffff','f2f6f8']]])for(const fg of [ink,muted])for(const bg of bgs){const a=luminance(fg),b=luminance(bg);const ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);minimum=Math.min(minimum,ratio);assert.ok(ratio>=4.5)}
 console.log('PASS: default, restored light, unsupported glass fallback and persistence, supported glass, invalid setting; text contrast minimum '+minimum.toFixed(2)+':1');

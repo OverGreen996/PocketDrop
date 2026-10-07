@@ -8,20 +8,41 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import QRCode from 'qrcode';
 import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
 
+const icon = (path: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;
+const icons = {
+ box: icon('M4 7 12 3l8 4v10l-8 4-8-4V7Zm0 0 8 4 8-4M12 11v10'),
+ text: icon('M4 5h16M12 5v15M8 20h8'),
+ files: icon('M3 7h7l2 2h9v11H3V7Zm0 0V4h7l2 3h7v2'),
+ settings: icon('M4 7h16M4 17h16M8 4v6M16 14v6'),
+ pin: icon('m8 3 8 0-1 6 4 4H5l4-4-1-6Zm4 10v8'),
+ close: icon('m6 6 12 12M18 6 6 18'),
+ minus: icon('M5 12h14'),
+ upload: icon('M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6'),
+};
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <main class="widget">
- <header><div class="brand" id="drag-handle"><span class="brand-icon">◇</span><div><h1>PocketDrop<span class="version">1.0</span></h1><p id="room-status">正在準備你的共享空間…</p></div></div><div class="window-actions"><button id="appearance-shortcut" aria-label="外觀設定" title="外觀設定">◐</button><button id="pin" aria-label="永遠置頂" aria-pressed="false">◇</button><button id="minimize" aria-label="最小化">−</button><button id="close" aria-label="關閉">×</button></div></header>
- <div class="intro"><span class="eyebrow">YOUR LITTLE SHARED SPACE</span><p>貼進去，丟進去，拿出來。</p></div>
- <section class="card text-card"><div class="section-head"><h2>Shared Text</h2><span class="tag" id="text-state">等待連線</span></div><textarea id="text" spellcheck="false" maxlength="32768" aria-label="共享文字" placeholder="貼上文字，按分享，Room 裡的裝置就會看到。"></textarea><div class="card-foot"><button id="latest">載入最新</button><button id="clear-text">清空</button><button id="copy">複製</button><button id="share-text" class="primary">分享文字 ↗</button></div></section>
- <section class="card files-card" id="files"><div class="section-head"><h2>Shared Files</h2><span class="tag" id="file-count">0 個檔案</span></div><div class="drop-zone"><span class="drop-icon">↓</span><strong id="drop-title">把檔案放到這裡</strong><span id="drop-subtitle">其他裝置按下載後才會取得檔案</span></div><ul id="file-list" aria-label="Room 檔案"></ul><p class="hint">下載存入「下載／PocketDrop」</p><button id="downloads">開啟下載資料夾</button><p id="transfer-status" class="hint"></p><button id="cancel-download" hidden>取消下載</button></section>
- <section class="card"><div class="section-head"><h2>自己的裝置</h2><button class="primary" id="pair">邀請裝置 ↗</button></div><div class="control-row"><button id="join">加入既有 Room</button><button id="leave" hidden>返回自己的 Room</button></div><ul id="devices"></ul><p class="hint">手機或另一台電腦都可用驗證碼或 QR 加入。<br>兩端使用同一個 Wi-Fi，電腦需保持開啟。</p></section>
+ <header><div class="brand" id="drag-handle"><span class="brand-icon">${icons.box}</span><div><h1>PocketDrop</h1><p id="room-status">正在準備你的共享空間…</p></div></div><div class="window-actions"><button id="appearance-shortcut" aria-label="外觀與設定" title="外觀與設定">${icons.settings}</button><button id="pin" aria-label="永遠置頂" title="永遠置頂" aria-pressed="false">${icons.pin}</button><button id="minimize" aria-label="最小化">${icons.minus}</button><button id="close" aria-label="關閉">${icons.close}</button></div></header>
+ <div class="intro"><span class="eyebrow">你的區域網路共享空間</span><p>貼進去，丟進去，拿出來。</p></div>
+ <nav class="section-nav" aria-label="共享區導覽"><button data-section=".text-card">文字</button><button data-section=".files-card">檔案</button><button data-section=".device-card">裝置</button><button data-section=".settings">設定</button></nav>
+ <div class="workspace">
+ <section class="card text-card"><div class="section-head"><h2><span class="section-icon">${icons.text}</span><span>共享文字<small>Shared Text</small></span></h2><span class="tag" id="text-state">等待連線</span></div><textarea id="text" spellcheck="false" maxlength="32768" aria-label="共享文字" placeholder="貼上文字，按分享，Room 裡的裝置就會看到。"></textarea><div class="card-foot"><button id="latest">載入最新</button><button id="clear-text">清空</button><button id="copy">複製</button><button id="share-text" class="primary">分享文字 ↗</button></div></section>
+ <section class="card files-card" id="files"><div class="section-head"><h2><span class="section-icon">${icons.files}</span><span>共享檔案<small>Shared Files</small></span></h2><span class="tag" id="file-count">0 個檔案</span></div><div class="drop-zone"><span class="drop-icon">${icons.upload}</span><strong id="drop-title">把檔案放到這裡</strong><span id="drop-subtitle">其他裝置按下載後才會取得檔案</span></div><ul id="file-list" aria-label="Room 檔案"></ul><p class="hint">下載存入「下載／PocketDrop」</p><button id="downloads">開啟下載資料夾</button><p id="transfer-status" class="hint" role="status" aria-live="polite"></p><button id="cancel-download" hidden>取消下載</button></section>
+ </div><section class="card device-card"><div class="section-head"><h2>自己的裝置</h2><button class="primary" id="pair">邀請裝置 ↗</button></div><div class="control-row"><button id="join">加入既有 Room</button><button id="leave" hidden>返回自己的 Room</button></div><ul id="devices"></ul><p class="hint">手機或另一台電腦都可用驗證碼或 QR 加入。<br>兩端使用同一個 Wi-Fi，電腦需保持開啟。</p></section>
  <details class="settings"><summary>連線與外觀設定</summary><div class="control-row"><label for="interface">本機網路</label><select id="interface"></select><button id="connect">啟動</button></div><p class="hint" id="network-status">若 Windows 詢問防火牆，請允許信任的私人網路，讓手機可以連線。</p><div class="control-row"><label for="appearance">外觀</label><select id="appearance"><option value="dark">清晰深色（建議）</option><option value="light">清晰淺色</option><option value="glass">原生玻璃</option></select></div><p class="hint" id="material-status" role="status"></p><button id="backdrop">開啟外部背景測試板 ↗</button></details>
- <footer><span>1.0.5 · 建立 Room 的電腦需開啟</span><span title="拖曳視窗邊緣可調整大小">拖曳邊緣調整大小 ◢</span></footer><div id="toast" role="status" aria-live="polite"></div>
- <dialog id="pair-dialog"><div class="section-head"><h2>讓裝置加入 Room</h2><button id="close-pair">×</button></div><p>在另一台裝置輸入驗證碼，或掃描 QR Code</p><p id="invite-host" class="hint"></p><strong id="pair-code" class="pair-code"></strong><button id="copy-code">複製驗證碼</button><canvas id="qr"></canvas><p id="qr-expiry"></p><p class="hint">邀請只能使用一次。請勿轉傳 QR Code。</p><button id="refresh-qr">產生新邀請</button></dialog>
-<dialog id="join-dialog"><div class="section-head"><h2>加入 Room</h2><button id="close-join">×</button></div><p>在建立 Room 的電腦按「邀請裝置」</p><label for="nearby">附近的電腦</label><select id="nearby"></select><button id="scan-rooms">重新尋找</button><input id="verification" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="8 位驗證碼" aria-label="驗證碼"><button id="join-code" class="primary">使用驗證碼加入</button><hr><button id="scan-camera">掃描 QR Code</button><label class="qr-file">或選取 QR 圖片<input id="qr-image" type="file" accept="image/*"></label><video id="camera" muted playsinline hidden></video><p class="hint" id="join-status">請使用同一個 Wi-Fi／區域網路。</p></dialog>
+ <footer><span>1.0.6 · 僅限區域網路</span><span title="拖曳視窗邊緣可調整大小">拖曳邊緣調整大小 ◢</span></footer><div id="toast" role="status" aria-live="polite"></div>
+ <dialog id="pair-dialog"><div class="section-head"><h2>讓裝置加入 Room</h2><button id="close-pair" aria-label="關閉配對視窗">${icons.close}</button></div><p>在另一台裝置輸入驗證碼，或掃描 QR Code</p><p id="invite-host" class="hint"></p><strong id="pair-code" class="pair-code"></strong><button id="copy-code">複製驗證碼</button><canvas id="qr"></canvas><p id="qr-expiry"></p><p class="hint">邀請只能使用一次。請勿轉傳 QR Code。</p><button id="refresh-qr">產生新邀請</button></dialog>
+<dialog id="join-dialog"><div class="section-head"><h2>加入 Room</h2><button id="close-join" aria-label="關閉加入視窗">${icons.close}</button></div><p>在建立 Room 的電腦按「邀請裝置」</p><label for="nearby">附近的電腦</label><select id="nearby"></select><button id="scan-rooms">重新尋找</button><input id="verification" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="8 位驗證碼" aria-label="驗證碼"><button id="join-code" class="primary">使用驗證碼加入</button><hr><button id="scan-camera">掃描 QR Code</button><label class="qr-file">或選取 QR 圖片<input id="qr-image" type="file" accept="image/*"></label><video id="camera" muted playsinline hidden></video><p class="hint" id="join-status">請使用同一個 Wi-Fi／區域網路。</p></dialog>
 </main>
 ${(['North','South','East','West','NorthEast','NorthWest','SouthEast','SouthWest'] as const).map(direction => `<div class="resize-edge resize-${direction}" data-resize="${direction}" aria-hidden="true"></div>`).join('')}`;
 const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+document.querySelectorAll<HTMLButtonElement>('[data-section]').forEach(button => {
+ button.onclick = () => {
+  const target = document.querySelector<HTMLElement>(button.dataset.section!)!;
+  if (target instanceof HTMLDetailsElement) target.open = true;
+  target.scrollIntoView({ block: 'start', behavior: 'instant' });
+  target.querySelector<HTMLElement>('textarea,button,summary')?.focus({ preventScroll: true });
+ };
+});
 let toastTimer = 0;
 function toast(message: string) { $('#toast').textContent = message; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => $('#toast').classList.remove('show'), 5000); }
 const size = (n: number) => { const i = n ? Math.min(4, Math.floor(Math.log(n) / Math.log(1024))) : 0; return `${(n / 1024 ** i).toFixed(i ? 1 : 0)} ${['B','KB','MB','GB','TB'][i]}`; };
@@ -47,6 +68,7 @@ function render(state: Snapshot) {
   if (!joined) li.append(remove);
   return li;
  }));
+ $('#devices').classList.toggle('empty', state.devices.length === 0);
  $('#devices').replaceChildren(...state.devices.map(device => {
   const li = document.createElement('li'); const name = document.createElement('span'); name.textContent = device.name;
   const revoke = document.createElement('button'); revoke.textContent = '移除裝置'; revoke.onclick = () => void invoke('phone_revoke', {deviceId: device.device_id}).then(() => toast('已撤銷此裝置的存取權')).catch(e => toast(String(e)));
@@ -83,7 +105,7 @@ async function invite() {
 }
 $('#pair').onclick = () => void invite(); $('#refresh-qr').onclick = () => void invite(); $('#close-pair').onclick = () => { $<HTMLDialogElement>('#pair-dialog').close(); clearInterval(expiryTimer); };
 async function init() {
- if (!isTauri()) { $('#room-status').textContent = '請啟動 Windows 執行檔'; return; }
+ if (!isTauri()) { $('#room-status').textContent = '介面預覽 · 請啟動 Windows 執行檔以連線'; return; }
  const win = getCurrentWindow(); await invoke('initialize_window');
  document.querySelectorAll<HTMLElement>('[data-resize]').forEach(edge => {
   edge.onpointerdown = event => {

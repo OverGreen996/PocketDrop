@@ -52,9 +52,10 @@ public final class MainActivity extends Activity {
     private TextView status,notice,progress;
     private EditText editor;
     private Button cancel;
+    private final Button[] tabButtons=new Button[3];
     private String pendingText;
     private final ArrayList<Uri> pendingUris=new ArrayList<>();
-    private static final int PICK=31, INK=0xffedf5f5, MUTED=0xffabc1c9, ACCENT=0xff86ddcc;
+    private static final int PICK=31, INK=0xfff1f5fa, MUTED=0xffb8c6d5, ACCENT=0xffacf3dc;
     private final Runnable pulse=new Runnable(){public void run(){if(!foreground)return;if(client!=null){refresh();connectSocket();if(!online){retryCandidates();if(++retryTicks%6==0)discover();}}ui.postDelayed(this,5000);}};
 
     @Override public void onCreate(Bundle saved){super.onCreate(saved);vault=new Vault(this);nearby=new Nearby(this);buildUi();
@@ -84,28 +85,28 @@ public final class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent i){super.onNewIntent(i);setIntent(i);receive(i);consumePending();}
     private int dp(float n){return (int)(getResources().getDisplayMetrics().density*n+.5f);}
     private TextView label(String text,int size,int color){TextView t=new TextView(this);t.setText(text);t.setTextSize(size);t.setTextColor(color);t.setPadding(0,dp(6),0,dp(6));return t;}
-    private GradientDrawable surface(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(22));d.setStroke(dp(1),0x334fe0cd);return d;}
+    private GradientDrawable surface(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(22));d.setStroke(dp(1),0xff445468);return d;}
     private LinearLayout column(){LinearLayout v=new LinearLayout(this);v.setOrientation(LinearLayout.VERTICAL);return v;}
-    private Button button(String text,Runnable action){Button b=new Button(this);b.setText(text);b.setAllCaps(false);b.setTextColor(INK);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff28434c));b.setOnClickListener(v->action.run());return b;}
+    private Button button(String text,Runnable action){Button b=new Button(this);b.setText(text);b.setAllCaps(false);b.setTextColor(INK);b.setTextSize(14);b.setMinHeight(dp(48));b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff2e4053));b.setOnClickListener(v->action.run());return b;}
     private void buildUi(){
-        root=column();root.setPadding(dp(22),dp(18),dp(22),dp(12));root.setBackgroundColor(0xff101d27);
+        root=column();root.setPadding(dp(22),dp(18),dp(22),dp(12));root.setBackgroundColor(0xff111c2b);
         ViewCompat.setOnApplyWindowInsetsListener(root,(v,insets)->{var bars=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.ime());v.setPadding(dp(22)+bars.left,dp(14)+bars.top,dp(22)+bars.right,dp(12)+bars.bottom);return insets;});
-        TextView brand=label("PocketDrop",30,INK);brand.setTypeface(null,Typeface.BOLD);root.addView(brand);
+        TextView brand=label("PocketDrop",28,INK);brand.setTypeface(null,Typeface.BOLD);root.addView(brand);
         status=label("尚未配對 · 與電腦連上同一個 Wi-Fi",13,ACCENT);root.addView(status);
         notice=label("貼進去，丟進去，拿出來。",14,MUTED);root.addView(notice);
-        LinearLayout tabs=new LinearLayout(this);String[] names={"文字","檔案","裝置"};for(int i=0;i<3;i++){final int index=i;tabs.addView(button(names[i],()->showTab(index)),new LinearLayout.LayoutParams(0,dp(50),1));}root.addView(tabs);
+        LinearLayout tabs=new LinearLayout(this);tabs.setPadding(dp(4),dp(4),dp(4),dp(4));tabs.setBackground(surface(0xff142131));String[] names={"文字","檔案","裝置"};for(int i=0;i<3;i++){final int index=i;tabButtons[i]=button(names[i],()->showTab(index));tabs.addView(tabButtons[i],new LinearLayout.LayoutParams(0,dp(50),1));}root.addView(tabs);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);content=column();content.setPadding(0,dp(12),0,dp(12));scroll.addView(content);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        textView=column();textView.setPadding(dp(18),dp(14),dp(18),dp(14));textView.setBackground(surface(0xff192f3a));textView.addView(label("Shared Text",21,INK));
-        editor=new EditText(this);editor.setTextColor(INK);editor.setHintTextColor(MUTED);editor.setHint("貼上文字，按分享，電腦就會看到");editor.setTextSize(17);editor.setGravity(Gravity.TOP);editor.setMinLines(7);editor.setMaxLines(14);editor.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);editor.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32768)});textView.addView(editor,new LinearLayout.LayoutParams(-1,-2));
+        textView=column();textView.setPadding(dp(18),dp(14),dp(18),dp(14));textView.setBackground(surface(0xff1b2a3b));textView.addView(label("共享文字",22,INK));textView.addView(label("SHARED TEXT · 貼上，分享，立即取用",12,MUTED));
+        editor=new EditText(this);editor.setTextColor(INK);editor.setHintTextColor(MUTED);editor.setHint("貼上文字，按分享，電腦就會看到");editor.setTextSize(17);editor.setGravity(Gravity.TOP);editor.setPadding(dp(12),dp(14),dp(12),dp(14));editor.setBackground(surface(0xff142131));editor.setMinLines(7);editor.setMaxLines(14);editor.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);editor.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32768)});textView.addView(editor,new LinearLayout.LayoutParams(-1,-2));
         editor.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int st,int c,int a){}public void onTextChanged(CharSequence s,int st,int before,int count){if(!updating)editing=true;}public void afterTextChanged(Editable s){}});
-        textView.addView(button("分享文字到 Room",()->sendText(editor.getText().toString())));
+        Button share=button("分享文字到 Room",()->sendText(editor.getText().toString()));share.setTextColor(0xff12362b);share.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ACCENT));textView.addView(share);
         LinearLayout row=new LinearLayout(this);row.addView(button("複製",()->{((ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("PocketDrop",editor.getText()));notice("已複製");}),new LinearLayout.LayoutParams(0,-2,1));row.addView(button("清空並同步",()->sendText("")),new LinearLayout.LayoutParams(0,-2,1));textView.addView(row);
         textView.addView(button("載入 Room 最新文字",()->{editing=false;getSharedPreferences("update-draft",0).edit().remove("text").apply();refresh();}));
         filesView=column();devicesView=column();
         progress=label("",12,MUTED);root.addView(progress);cancel=button("取消傳輸",()->{cancelled=true;Call c=transfer;if(c!=null)c.cancel();});cancel.setVisibility(View.GONE);root.addView(cancel);
-        root.addView(label("1.0.2 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
+        root.addView(label("1.0.3 · 建立 Room 的電腦需保持開啟",11,MUTED));setContentView(root);
     }
-    private void showTab(int index){tab=index;content.removeAllViews();if(index==0)content.addView(textView);else if(index==1){renderFiles();content.addView(filesView);}else{renderDevices();content.addView(devicesView);}}
+    private void showTab(int index){tab=index;for(int i=0;i<tabButtons.length;i++){boolean selected=i==index;tabButtons[i].setSelected(selected);tabButtons[i].setTypeface(null,selected?Typeface.BOLD:Typeface.NORMAL);tabButtons[i].setTextColor(selected?ACCENT:MUTED);tabButtons[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(selected?0xff214e46:0xff142131));tabButtons[i].setContentDescription(new String[]{"文字","檔案","裝置"}[i]+(selected?"，已選取":""));}content.removeAllViews();if(index==0)content.addView(textView);else if(index==1){renderFiles();content.addView(filesView);}else{renderDevices();content.addView(devicesView);}}
     private void notice(String text){if(!isDestroyed())ui.post(()->notice.setText(text));}
     private void failure(Exception e){String m=e.getMessage();notice(m==null?"操作失敗，請確認 Wi-Fi 與電腦狀態":m);}
     private void setOnline(boolean value){online=value;status.setText(client==null?"尚未配對 · 與電腦連上同一個 Wi-Fi":value?"● 已連線 · PocketDrop Room":"○ 目前無法取得 · 電腦離線或網路中斷");if(tab==1)renderFiles();}
@@ -197,7 +198,7 @@ public final class MainActivity extends Activity {
     private void consumePending(){if(client==null)return;if(pendingText!=null){String text=pendingText;pendingText=null;updating=true;editor.setText(text);updating=false;sendText(text);showTab(0);}if(!pendingUris.isEmpty()&&!transferBusy){ArrayList<Uri> items=new ArrayList<>(pendingUris);pendingUris.clear();uploadAll(items);showTab(1);}}
     private void renderFiles(){filesView.removeAllViews();filesView.addView(label("Shared Files",21,INK));filesView.addView(button("加入手機檔案",()->{if(client==null){showTab(2);notice("請先配對電腦");return;}Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);startActivityForResult(pick,PICK);}));
         if(files.length()==0)filesView.addView(label("把檔案拖進電腦 Widget，或從手機分享進來。只有按下載才會存到手機。",15,MUTED));
-        for(int i=0;i<files.length();i++){JSONObject f=files.optJSONObject(i);if(f==null)continue;LinearLayout card=column();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(surface(0xff192f3a));LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(-1,-2);params.bottomMargin=dp(10);filesView.addView(card,params);card.addView(label(f.optString("name"),17,INK));boolean available=online&&f.optBoolean("available");card.addView(label(size(f.optLong("size"))+" · "+f.optString("origin")+(!available?"\n目前無法取得 · 來源離線或檔案已變更":""),12,MUTED));Button download=button("下載",()->download(f));download.setEnabled(available&&!transferBusy);card.addView(download);}
+        for(int i=0;i<files.length();i++){JSONObject f=files.optJSONObject(i);if(f==null)continue;LinearLayout card=column();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(surface(0xff1b2a3b));LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(-1,-2);params.bottomMargin=dp(10);filesView.addView(card,params);card.addView(label(f.optString("name"),17,INK));boolean available=online&&f.optBoolean("available");card.addView(label(size(f.optLong("size"))+" · "+f.optString("origin")+(!available?"\n目前無法取得 · 來源離線或檔案已變更":""),12,MUTED));Button download=button("下載",()->download(f));download.setEnabled(available&&!transferBusy);card.addView(download);}
     }
     private static String size(long n){if(n<1024)return n+" B";if(n<1024*1024)return String.format(Locale.ROOT,"%.1f KB",n/1024.0);if(n<1024L*1024*1024)return String.format(Locale.ROOT,"%.1f MB",n/(1024.0*1024));return String.format(Locale.ROOT,"%.1f GB",n/(1024.0*1024*1024));}
     private boolean beginTransfer(){if(client==null){notice("請先配對電腦");return false;}if(transferBusy){notice("請等待目前傳輸完成，或先取消");return false;}transferBusy=true;cancelled=false;cancel.setVisibility(View.VISIBLE);progress.setText("準備傳輸…");if(tab==1)renderFiles();return true;}

@@ -58,8 +58,11 @@ async fn initialize_window(window: tauri::WebviewWindow) -> Result<(), String> {
     window
         .set_zoom(1.0 / window.scale_factor().map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
+    let height = window.current_monitor().ok().flatten()
+        .map(|monitor| (monitor.size().height as f64 / monitor.scale_factor() - 80.0).clamp(480.0, 860.0))
+        .unwrap_or(740.0);
     window
-        .set_size(tauri::LogicalSize::new(440.0, 740.0))
+        .set_size(tauri::LogicalSize::new(480.0, height))
         .map_err(|e| e.to_string())?;
     Ok(())
 }

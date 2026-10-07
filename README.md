@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/OverGreen996/PocketDrop/releases/tag/v1.0.5"><img src="https://img.shields.io/badge/Windows-1.0.5-2563eb?style=flat-square" alt="Windows 1.0.5"></a>
+  <a href="https://github.com/OverGreen996/PocketDrop/releases/tag/v1.0.6"><img src="https://img.shields.io/badge/Windows-1.0.6-2563eb?style=flat-square" alt="Windows 1.0.6"></a>
   <a href="https://github.com/OverGreen996/PocketDrop/releases/tag/android-v1.0.2"><img src="https://img.shields.io/badge/Android-1.0.2-147d64?style=flat-square" alt="Android 1.0.2"></a>
 </p>
 
@@ -19,7 +19,6 @@
   <a href="#下載與安裝"><strong>下載安裝</strong></a> ·
   <a href="#開始使用">開始使用</a> ·
   <a href="#外觀與操作">外觀與操作</a> ·
-  <a href="#daily-agent-介接-api">Daily-Agent API</a> ·
   <a href="#開發">開發文件</a>
 </p>
 
@@ -42,7 +41,7 @@
 
 | 平台 | 安裝包 | 系統需求 |
 | :--- | :--- | :--- |
-| **Windows** | [**下載 Windows 1.0.5**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.5/PocketDrop-1.0.5-Windows-x64-Setup.exe) | Windows 10／11，x64；需要 WebView2 |
+| **Windows** | [**下載 Windows 1.0.6**](https://github.com/OverGreen996/PocketDrop/releases/download/v1.0.6/PocketDrop-1.0.6-Windows-x64-Setup.exe) | Windows 10／11，x64；需要 WebView2 |
 | **Android** | [**下載 Android 1.0.2 APK**](https://github.com/OverGreen996/PocketDrop/releases/download/android-v1.0.2/PocketDrop-1.0.2-Android.apk) | Android 8.0 以上 |
 
 [所有版本與 SHA256 校驗檔](https://github.com/OverGreen996/PocketDrop/releases) · [回報問題](https://github.com/OverGreen996/PocketDrop/issues)
@@ -69,6 +68,10 @@ Windows 安裝於目前使用者帳號，安裝包尚未使用 Authenticode 簽�
 Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許信任的私人網路。訪客 Wi-Fi 的裝置隔離可能阻止互相發現。
 
 ## 外觀與操作
+
+![PocketDrop 1.0.6 淺色介面：文字與檔案並列，含裝置管理與快速導覽](docs/assets/windows-1.0.6.png)
+
+*Windows 前端介面預覽，使用示例文字；非原生玻璃實機效果截圖。*
 
 按右上角 **◐ → 外觀**，選擇適合你的桌面風格；設定會保存。
 
@@ -108,7 +111,7 @@ Windows 防火牆提示是讓自己的裝置能在私人網路連線；請允許
 
 Windows 1.0.5 起，每次啟動會在背景檢查 GitHub 新版。出現提示後按「是，更新」，程式下載並驗證簽章，接著關閉並啟動覆蓋更新，完成後重新開啟。也可在「連線與外觀設定」按「檢查更新」。按「稍後」不會下載或安裝。
 
-舊版請先手動安裝 1.0.5 一次，以後不用手動下載安裝包或解除安裝。這是完整程式包的原地更新，不是不中斷執行的熱更新或差分更新。更新期間 Room 暫時離線；配對、設定、資料與未分享文字草稿保留。請先完成所有裝置的檔案傳輸。
+舊版請先手動安裝 1.0.5 或更新版本一次，以後不用手動下載安裝包或解除安裝。這是完整程式包的原地更新，不是不中斷執行的熱更新或差分更新。更新期間 Room 暫時離線；配對、設定、資料與未分享文字草稿保留。請先完成所有裝置的檔案傳輸。
 
 只有版本檢查與更新包下載會連到 GitHub；共享文字、檔案與配對仍在 LAN。沒有網際網路時可以照常分享，更新失敗可稍後手動重試。Android 1.0.2 起也支援啟動檢查與「裝置 → 檢查 App 更新」。先手動覆蓋安裝本版一次，之後可在 App 內下載 APK，經 Android 系統確認後更新。首次可能需要允許 PocketDrop 安裝 App；不會繞過系統確認。
 
@@ -117,18 +120,6 @@ Windows 1.0.5 起，每次啟動會在背景檢查 GitHub 新版。出現提示�
 ## 從原有版本更新
 
 Windows 保留原本的應用程式識別及本機資料路徑；Android 保留套件識別與發佈簽章，更新可沿用既有配對。請先關閉舊版 Windows PocketDrop，再啟動安裝後的版本，避免同一個 Room 同時啟動兩份。
-
-## Daily-Agent 介接 API
-
-Windows PocketDrop 1.0.5 可透過配對後的 HTTPS API 連接 Daily-Agent，提供共享文字讀寫與檔案列表。[安裝與 API 文件](integrations/daily-agent/README.md)。
-
-可以對電腦上的 Daily-Agent 說：
-
-> 「讀取 PocketDrop 的共享文字。」<br>
-> 「把這段文字分享到 PocketDrop：明天十點開會。」<br>
-> 「列出 PocketDrop 的檔案。」
-
-需另行安裝介接模組、用 QR 配對，再重新啟動 Daily-Agent。目前僅供電腦使用者明確呼叫，不開放手機遠端橋接或背景事件。若 Daily-Agent 使用雲端模型，主動讀取的內容可能送往該模型。
 
 ## 常見問題
 
@@ -163,4 +154,10 @@ npm run test:rust
 
 Android：設定 `ANDROID_HOME`、`JAVA_HOME`，以 Gradle 執行 `assembleRelease lintRelease testReleaseUnitTest`。正式更新簽章由本機環境提供，不包含在 Git 中；其他開發者應透過 `POCKETDROP_KEYSTORE`、`POCKETDROP_STORE_PASSWORD`、`POCKETDROP_KEY_ALIAS`、`POCKETDROP_KEY_PASSWORD` 指定自己的簽章。自行簽署的 APK 無法直接覆蓋官方 APK。
 
-原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，版本更新請看 [Windows 1.0.5](docs/RELEASE_1.0.5.md) 與 [Android 1.0.2](docs/RELEASE_ANDROID_1.0.2.md)。
+原始 Windows／Android 實驗記錄保留在 `docs/`，它們描述歷史版本。目前架構請看 [ARCHITECTURE_v1.0.md](docs/ARCHITECTURE_v1.0.md)，版本更新請看 [Windows 1.0.6](docs/RELEASE_1.0.6.md) 與 [Android 1.0.2](docs/RELEASE_ANDROID_1.0.2.md)。
+
+## 1.0.6 變更
+
+Windows 介面重新設計，新增文字／檔案／裝置／設定快速導覽，放大操作區並改善寬視窗排版。已移除外部程式介接模組，啟動時撤銷舊 Daily-Agent 模組建立的配對。PocketDrop 裝置間的區域網路配對與同步保留。
+
+Android 介面調整已納入原始碼，但 1.0.3 尚未發布：原 Android 發布簽章金鑰不在目前工作區，現有下載仍為 1.0.2，未變更 Android OTA 清單。

@@ -255,6 +255,9 @@ impl Core {
         std::fs::create_dir_all(&inbox).map_err(|_| "無法建立接收資料夾")?;
         let db = Connection::open(dir.join("phone-trial.sqlite")).map_err(|e| e.to_string())?;
         db.execute_batch("PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY,v TEXT NOT NULL); CREATE TABLE IF NOT EXISTS members(id TEXT PRIMARY KEY,name TEXT NOT NULL,token_hash TEXT NOT NULL,pubkey TEXT NOT NULL,revoked INTEGER NOT NULL DEFAULT 0); CREATE TABLE IF NOT EXISTS history(version INTEGER PRIMARY KEY,content TEXT NOT NULL,source TEXT NOT NULL,at INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,name TEXT NOT NULL,size INTEGER NOT NULL,origin TEXT NOT NULL,deleted INTEGER NOT NULL DEFAULT 0,sha256 TEXT); CREATE TABLE IF NOT EXISTS bindings(file_id TEXT PRIMARY KEY,local_path TEXT NOT NULL,modified INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS sources(owner TEXT PRIMARY KEY,data BLOB NOT NULL,seen INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS remote_ids(owner TEXT,source TEXT,id TEXT UNIQUE,deleted INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(owner,source)); INSERT OR IGNORE INTO meta VALUES('revision','0'); INSERT OR IGNORE INTO meta VALUES('text','');").map_err(|e|e.to_string())?;
+        // Retire the shipped external integration before the listener starts.
+        db.execute("UPDATE members SET revoked=1 WHERE name='Daily-Agent' AND revoked=0", [])
+            .map_err(|e| e.to_string())?;
         for key in ["room_id", "device_id"] {
             db.execute(
                 "INSERT OR IGNORE INTO meta VALUES(?1,?2)",
@@ -424,6 +427,7 @@ impl Core {
     }
     pub fn pair(&self, input: PairInput) -> ApiResult<PairOutput> {
         if uuid::Uuid::parse_str(&input.device_id).is_err()
+            || input.name == "Daily-Agent"
             || input.name.is_empty()
             || input.name.chars().count() > 60
             || input.name.chars().any(char::is_control)
@@ -1054,6 +1058,21 @@ pub fn phone_remove(state: tauri::State<'_, Phone>, file_id: String) -> Result<(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn retired_adapter_revoked_on_reopen_without_affecting_phone() {
+        let root = std::env::temp_dir().join(format!("pd-retire-{}", uuid::Uuid::new_v4()));
+        let core = Core::open(&root, root.join("inbox")).unwrap();
+        for (id, name) in [("adapter", "Daily-Agent"), ("phone", "Android phone")] {
+            core.db.lock().unwrap().execute("INSERT INTO members VALUES(?1,?2,?3,'key',0)", params![id, name, hash(id.as_bytes())]).unwrap();
+        }
+        drop(core);
+        let core = Core::open(&root, root.join("inbox")).unwrap();
+        assert!(!core.valid_digest(&hash(b"adapter")));
+        assert!(core.valid_digest(&hash(b"phone")));
+        assert_eq!(core.snapshot().unwrap().devices.len(), 1);
+        drop(core);
+        std::fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn filenames_reject_paths_and_windows_devices() {
         for name in ["../x", "C:\\secret", "CON.txt", "a/b", "file.", "x\n.exe"] {
